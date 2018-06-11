@@ -135,7 +135,7 @@ foreach ($whsearray as $whsesel) {
                                                                                           sum(CASE WHEN  PDHACL = 'C9' and (PDSHPZ in ('SDA','NXD','NDD') or PDSHPZ like ('SD%')) then 1 WHEN PDHGCL not in ('SQ','OD', ' ') then 1 else 0 end) as TRUEHAZ
                                                                                FROM HSIPCORDTA.NOTWPD JOIN HSIPCORDTA.NPFIMS on IMITEM = PDITEM
                                                                                JOIN HSIPCORDTA.NOTWPB on PDWCS# = PBWCS# and PDWKNO = PBWKNO and PBBOX# = PDBOX#
-                                                                               WHERE PDWHSE = $whsesel  and PDBXSZ <> 'CSE' and PDCART > 0 and PDLOC# not like '%SDS%' and SUBSTR(PBSPCC,1,1) <> 'R' $printlimiter and PBCART = '00990'
+                                                                               WHERE PDWHSE = $whsesel  and PDBXSZ <> 'CSE' and PDCART > 0 and PDLOC# not like '%SDS%' and SUBSTR(PBSPCC,1,1) <> 'R' $printlimiter 
                                                                                GROUP BY PBLP9D, PBWHSE, PBCART, PBBIN#, PBBXSZ, PBSHPZ, PBPTJD, PBPTHR, PBICEF");
     $totedata->execute();
     $totedataarray = $totedata->fetchAll(pdo::FETCH_ASSOC);
@@ -154,7 +154,7 @@ foreach ($whsearray as $whsesel) {
                                                                                 WHERE TRIM(substring(A.NVFLAT,3,2)) = '0$whsesel' 
                                                                                                and TRIM(substr(A.NVFLAT,111,10)) <> ' ' 
                                                                                                and TRIM(substr(A.NVFLAT,111,10)) = CURDATE()
-                                                                                               and TRIM(substr(A.NVFLAT,12,6)) = 'PCKSTR'  and TRIM(substr(NVFLAT,7,5))  = '00990'
+                                                                                               and TRIM(substr(A.NVFLAT,12,6)) = 'PCKSTR' 
                                                                                                and TRIM(substr(A.NVFLAT,111,19)) in (SELECT max(TRIM(substr(B.NVFLAT,111,19))) from HSIPCORDTA.NOFNVI B WHERE TRIM(substr(B.NVFLAT,46,10)) = TRIM(substr(A.NVFLAT,46,10)))");
     $cartstartdata->execute();
     $cartstartdata_array = $cartstartdata->fetchAll(pdo::FETCH_ASSOC);
@@ -173,7 +173,7 @@ foreach ($whsearray as $whsesel) {
                                                                                              TRIM(substr(NVFLAT,137,19))  as ENDTIME                        
                                                                                 FROM HSIPCORDTA.NOFNVI 
                                                                                 WHERE TRIM(substring(NVFLAT,3,2)) = '0$whsesel' 
-                                                                                              and TRIM(substr(NVFLAT,137,10)) <> ' ' and TRIM(substr(NVFLAT,7,5))  = '00990'
+                                                                                              and TRIM(substr(NVFLAT,137,10)) <> ' ' 
                                                                                               and TRIM(substr(NVFLAT,137,10)) = CURDATE()");
     $toteenddata->execute();
     $toteenddata_array = $toteenddata->fetchAll(pdo::FETCH_ASSOC);
@@ -407,6 +407,10 @@ foreach ($whsearray as $whsesel) {
 //took out $loosepm_box13, not on NY server yet
             $standard_totaltime = $standard_shorts + $loosepm_scanlp + $totalboxtime + $standard_contentlist + $standard_unit + $standard_line + $standard_expiry + $standard_lot + $standard_lot_unit + $standard_sn + $loosepm_box24 + $loosepm_temp + $standard_od + $standard_sq + $loosepm_shcode + $loosepm_truehaz + $loosepm_tempindicator;
             $standard_timewithPFD = $standard_totaltime * (1 + $loosepm_personal + $loosepm_fatigue + $loosepm_delay); //is this right?  at tote or batch level?  does it matter?
+            if($standard_timewithPFD > 999){
+                $standard_timewithPFD = 999;
+            }
+            
             $data[] = "($PBLP9D, '$PACKFUNCTION', $PDWHSE, $PDCART, $PDBIN, '$PDBXSZ', '$PDSHPZ', $LINE_COUNT, $UNIT_COUNT, $EXP_CHECK, $LOT_CHECK, $SERIAL_CHECK, $SHORTCHECK, $TEMP_CHECK, $OD_CHECK, $SQ_CHECK, '$standard_shorts', '$loosepm_scanlp', '$totalboxtime', '$standard_contentlist', '$standard_unit', '$standard_line', '$standard_expiry', '$standard_lot', '$standard_lot_unit', '$standard_sn', '$loosepm_box24', '$loosepm_temp','$standard_od','$standard_sq', '$loosepm_truehaz', '$standard_totaltime', '$standard_timewithPFD', '$printdatetime')";
             $counter += 1;
         }

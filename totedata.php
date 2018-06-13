@@ -662,10 +662,12 @@ foreach ($whsearray as $whsesel) {
                                                                                     totetimes_whse,
                                                                                     'PCK',
                                                                                     totetimes_packfunction,
-                                                                                    CAST(SUM(totetimes_totalPFD) + loosepm_cartprep + loosepm_cartcomplete - 1
-                                                                                        AS UNSIGNED) AS MINTIME,
-                                                                                    CAST(SUM(totetimes_totalPFD) + loosepm_cartprep + loosepm_cartcomplete
-                                                                                        AS UNSIGNED) AS MAXTIME,
+                                                                                   case when CAST(SUM(totetimes_totalPFD) + loosepm_cartprep + loosepm_cartcomplete - 1
+                                                                                        AS UNSIGNED) > 999 then 999 else CAST(SUM(totetimes_totalPFD) + loosepm_cartprep + loosepm_cartcomplete - 1
+                                                                                        AS UNSIGNED) end  AS MINTIME,
+                                                                                    case when CAST(SUM(totetimes_totalPFD) + loosepm_cartprep + loosepm_cartcomplete
+                                                                                        AS UNSIGNED) > 999 then 999 else CAST(SUM(totetimes_totalPFD) + loosepm_cartprep + loosepm_cartcomplete
+                                                                                        AS UNSIGNED) end  AS MAXTIME,
                                                                                     NOW()
                                                                                 FROM
                                                                                     printvis.totetimes

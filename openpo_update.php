@@ -7,12 +7,11 @@
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 ini_set('max_allowed_packet', 999999999);
-include '../globalincludes/nahsi_mysql.php';  //conn1
+include '../connections/conn_custaudit.php';  //conn1
 include '../globalincludes/usa_asys.php';  //conn1
-//include '../../globalincludes/ustxgpslotting_mysql.php';  //conn1
 
 
-$sqltruncate = "TRUNCATE slotting.openpo";
+$sqltruncate = "TRUNCATE custaudit.openpo";
 $querydelete = $conn1->prepare($sqltruncate);
 $querydelete->execute();
 
@@ -69,7 +68,7 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT IGNORE INTO openpo ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO custaudit.openpo ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange +=10000;

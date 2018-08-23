@@ -7,7 +7,7 @@
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 ini_set('max_allowed_packet', 999999999);
-include '../globalincludes/nahsi_mysql.php';  //conn1
+include '../connections/conn_custaudit.php';  //conn1
 //include '../../globalincludes/usa_asys.php';  //conn1
 //include '../../globalincludes/ustxgpslotting_mysql.php';  //conn1
 include 'globalfunctions.php';

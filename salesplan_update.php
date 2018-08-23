@@ -4,14 +4,14 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 ini_set('max_allowed_packet', 999999999);
 set_time_limit(99999);
-include '../globalincludes/nahsi_mysql.php';  //conn1
+include '../connections/conn_custaudit.php';  //conn1
 //include '../globalincludes/ustxgpslotting_mysql.php';  //conn1
 include '../globalincludes/usa_asys.php';  //$aseriesconn
 include '../globalfunctions/custdbfunctions.php';
 
 
 
-$sqldelete = "TRUNCATE TABLE slotting.salesplan_merge ";
+$sqldelete = "TRUNCATE TABLE custaudit.salesplan_merge ";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -58,7 +58,7 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT INTO slotting.salesplan_merge ($columns) VALUES $values ON DUPLICATE KEY UPDATE SALESPLAN = VALUES(SALESPLAN)";
+    $sql = "INSERT INTO custaudit.salesplan_merge ($columns) VALUES $values ON DUPLICATE KEY UPDATE SALESPLAN = VALUES(SALESPLAN)";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange += 10000;

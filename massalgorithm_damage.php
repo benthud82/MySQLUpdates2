@@ -2,13 +2,12 @@
 
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
-//include_once '../globalincludes/nahsi_mysql.php';
-include_once '../globalincludes/ustxgpslotting_mysql.php';
+include '../connections/conn_custaudit.php';  //conn1
 include_once '../globalincludes/usa_asys.php';
 include_once '../globalfunctions/slottingfunctions.php';
 
 
-$sqldelete = "TRUNCATE slotting.massalgorithm_damage_recs";
+$sqldelete = "TRUNCATE custaudit.massalgorithm_damage_recs";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -45,9 +44,9 @@ $damage = $conn1->prepare("SELECT
         ELSE 0
     END) / whslines_lines365) AS DMGACC_365
 FROM
-    slotting.custreturns
+    custaudit.custreturns
         JOIN
-    slotting.whslines ON whslines_whse = WHSE
+    custaudit.whslines ON whslines_whse = WHSE
         AND whslines_item = ITEMCODE
 WHERE
     RETURNCODE IN ('TDNR' , 'CRID')
@@ -59,7 +58,7 @@ HAVING (DMGACC_365 <= .97 OR DMGACC_90 <= .97
 $damage->execute();
 $damagearray = $damage->fetchAll(pdo::FETCH_ASSOC);
 
-$recentactioned = $conn1->prepare("SELECT concat(ma_whse, ma_item) as LOOKUPKEY FROM slotting.massalgorithm_actions WHERE ma_date >= DATE_ADD(CURDATE(), INTERVAL - 90 DAY)and ma_algorithm = 'DAMAGE';");
+$recentactioned = $conn1->prepare("SELECT concat(ma_whse, ma_item) as LOOKUPKEY FROM custaudit.massalgorithm_actions WHERE ma_date >= DATE_ADD(CURDATE(), INTERVAL - 90 DAY)and ma_algorithm = 'DAMAGE';");
 $recentactioned->execute();
 $recentactionedarray = $recentactioned->fetchAll(pdo::FETCH_ASSOC);
 
@@ -118,13 +117,13 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT IGNORE INTO slotting.massalgorithm_damage_recs ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO custaudit.massalgorithm_damage_recs ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange += 20000;
 } while ($counter <= $rowcount); //end of item by whse loop
 //populate skuopt summary table by whse/date
-$sql2 = "INSERT IGNORE INTO slotting.massalgorithm_damage_summary
+$sql2 = "INSERT IGNORE INTO custaudit.massalgorithm_damage_summary
                          SELECT 
                                 CURDATE(),
                                 damage_whse,
@@ -132,7 +131,7 @@ $sql2 = "INSERT IGNORE INTO slotting.massalgorithm_damage_summary
                                 SUM(damage_30day) AS monthunits,
                                 SUM(damage_365day) AS yearunits
                             FROM
-                                massalgorithm_damage_recs
+                                custaudit.massalgorithm_damage_recs
                             GROUP BY CURDATE() , damage_whse";
 $query2 = $conn1->prepare($sql2);
 $query2->execute();

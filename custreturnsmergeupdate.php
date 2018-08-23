@@ -3,6 +3,7 @@
 
 //determine the number of returns per invoice by ship to.  This does not provide detail.  Need to create another file to show indivudal detail.
 set_time_limit(99999);
+
 class Cls {
 
     function arraymapfunct($entry) {
@@ -12,19 +13,18 @@ class Cls {
 }
 
 set_time_limit(99999);
-include '../globalincludes/nahsi_mysql.php';
+include '../connections/conn_custaudit.php';  //conn1
 //include '../globalincludes/ustxgpslotting_mysql.php';
 include '../globalincludes/usa_asys.php';
 include '../globalincludes/usa_esys.php';
 include '../globalfunctions/custdbfunctions.php';
 
-$sqldelete = "TRUNCATE TABLE custreturnsmerge";
+$sqldelete = "TRUNCATE TABLE custaudit.custreturnsmerge";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
-//$startdate = date('Y-m-d', strtotime('-80 days'));
-$startdate = '2017-02-18';
-
+$startdate = date('Y-m-d', strtotime('-80 days'));
+//$startdate = '2017-02-18';
 //convert startdate for sql connection jdate below
 $startyear = date('y', strtotime($startdate));
 $startday = date('z', strtotime($startdate)) + 1;
@@ -128,18 +128,19 @@ for ($xstart = $startdatej; $xstart <= $enddatej; $xstart++) {
 
     //move sql here to add to merge table
 
-    $values = implode(',', $data);
 
-    if (!empty($values)) {
-        $sql = "INSERT IGNORE INTO slotting.custreturnsmerge ($columns) VALUES $values";
+
+    if (!empty($data)) {
+        $values = implode(',', $data);
+        $sql = "INSERT IGNORE INTO custaudit.custreturnsmerge ($columns) VALUES $values";
         $query = $conn1->prepare($sql);
         $query->execute();
     }
 }
 
 
-$sqlmerge = "INSERT INTO custreturns(BILLTONUM, BILLTONAME, SHIPTONUM, SHIPTONAME, WCSNUM, WONUM, SHIPDATEJ, JDENUM, RINUM, RETURNCODE, ITEMCODE, RETURNDATE, SHIPZONE, TRACERNUM, BOXNUM, BOXSIZE, WHSE, DIVISION, ORD_RETURNDATE)
-SELECT custreturnsmerge.BILLTONUM, custreturnsmerge.BILLTONAME, custreturnsmerge.SHIPTONUM, custreturnsmerge.SHIPTONAME, custreturnsmerge.WCSNUM, custreturnsmerge.WONUM, custreturnsmerge.SHIPDATEJ, custreturnsmerge.JDENUM, custreturnsmerge.RINUM, custreturnsmerge.RETURNCODE, custreturnsmerge.ITEMCODE, custreturnsmerge.RETURNDATE, custreturnsmerge.SHIPZONE, custreturnsmerge.TRACERNUM, custreturnsmerge.BOXNUM, custreturnsmerge.BOXSIZE, custreturnsmerge.WHSE, custreturnsmerge.DIVISION, custreturnsmerge.ORD_RETURNDATE FROM custreturnsmerge
+$sqlmerge = "INSERT INTO custaudit.custreturns(BILLTONUM, BILLTONAME, SHIPTONUM, SHIPTONAME, WCSNUM, WONUM, SHIPDATEJ, JDENUM, RINUM, RETURNCODE, ITEMCODE, RETURNDATE, SHIPZONE, TRACERNUM, BOXNUM, BOXSIZE, WHSE, DIVISION, ORD_RETURNDATE)
+SELECT custreturnsmerge.BILLTONUM, custreturnsmerge.BILLTONAME, custreturnsmerge.SHIPTONUM, custreturnsmerge.SHIPTONAME, custreturnsmerge.WCSNUM, custreturnsmerge.WONUM, custreturnsmerge.SHIPDATEJ, custreturnsmerge.JDENUM, custreturnsmerge.RINUM, custreturnsmerge.RETURNCODE, custreturnsmerge.ITEMCODE, custreturnsmerge.RETURNDATE, custreturnsmerge.SHIPZONE, custreturnsmerge.TRACERNUM, custreturnsmerge.BOXNUM, custreturnsmerge.BOXSIZE, custreturnsmerge.WHSE, custreturnsmerge.DIVISION, custreturnsmerge.ORD_RETURNDATE FROM custaudit.custreturnsmerge
 ON DUPLICATE KEY UPDATE custreturns.BILLTONUM = custreturnsmerge.BILLTONUM, custreturns.BILLTONAME = custreturnsmerge.BILLTONAME, custreturns.SHIPTONUM = custreturnsmerge.SHIPTONUM, custreturns.SHIPTONAME = custreturnsmerge.SHIPTONAME, custreturns.WCSNUM = custreturnsmerge.WCSNUM, custreturns.WONUM = custreturnsmerge.WONUM, custreturns.SHIPDATEJ = custreturnsmerge.SHIPDATEJ, custreturns.JDENUM = custreturnsmerge.JDENUM, custreturns.RINUM = custreturnsmerge.RINUM, custreturns.RETURNCODE = custreturnsmerge.RETURNCODE, custreturns.ITEMCODE = custreturnsmerge.ITEMCODE, custreturns.RETURNDATE = custreturnsmerge.RETURNDATE, custreturns.SHIPZONE = custreturnsmerge.SHIPZONE, custreturns.TRACERNUM = custreturnsmerge.TRACERNUM, custreturns.BOXNUM = custreturnsmerge.BOXNUM, custreturns.BOXSIZE = custreturnsmerge.BOXSIZE, custreturns.WHSE = custreturnsmerge.WHSE, custreturns.DIVISION = custreturnsmerge.DIVISION, custreturns.ORD_RETURNDATE = custreturnsmerge.ORD_RETURNDATE;";
 $querymerge = $conn1->prepare($sqlmerge);
 $querymerge->execute();

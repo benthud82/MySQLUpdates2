@@ -19,12 +19,12 @@ foreach ($whsearray as $whse) {
 
 
 
-$result = $aseriesconn->prepare("select PDWHSE, PDITEM, PDPKGU, CASE WHEN (PDSHPD<99999) THEN (date(('20' || RIGHT(PDSHPD,2)) || '-' || substr(PDSHPD,1,1) || '-' || substr(PDSHPD,2,2))) WHEN PDSHPD>99999 THEN (date(('20' || RIGHT(PDSHPD,2)) || '-' || substr(PDSHPD,1,2) || '-' || substr(PDSHPD,3,2))) END, sum(PDPCKQ) from A.HSIPCORDTA.NOTWPT WHERE((CURRENT DATE) -  CASE WHEN (PDSHPD<99999) THEN (date(('20' || RIGHT(PDSHPD,2)) || '-' || substr(PDSHPD,1,1) || '-' || substr(PDSHPD,2,2))) WHEN PDSHPD>99999 THEN (date(('20' || RIGHT(PDSHPD,2)) || '-' || substr(PDSHPD,1,2) || '-' || substr(PDSHPD,3,2))) END) <= 4 and PDBXSZ <> 'CSE' and PDPKGU <> 0  and LENGTH(RTRIM(TRANSLATE(PDITEM, '*', ' 0123456789'))) = 0 and PDWHSE = $whse  group by PDWHSE, PDITEM, PDPKGU, PDSHPD order by PDWHSE asc , PDITEM asc , PDPKGU asc");
+$result = $aseriesconn->prepare("select PDWHSE, PDITEM, CASE WHEN PDBXSZ = 'CSE' THEN 'CSE' ELSE 'LSE' end AS CSELSE, PDPKGU, CASE WHEN (PDSHPD<99999) THEN (date(('20' || RIGHT(PDSHPD,2)) || '-' || substr(PDSHPD,1,1) || '-' || substr(PDSHPD,2,2))) WHEN PDSHPD>99999 THEN (date(('20' || RIGHT(PDSHPD,2)) || '-' || substr(PDSHPD,1,2) || '-' || substr(PDSHPD,3,2))) END, sum(PDPCKQ) from A.HSIPCORDTA.NOTWPT WHERE((CURRENT DATE) -  CASE WHEN (PDSHPD<99999) THEN (date(('20' || RIGHT(PDSHPD,2)) || '-' || substr(PDSHPD,1,1) || '-' || substr(PDSHPD,2,2))) WHEN PDSHPD>99999 THEN (date(('20' || RIGHT(PDSHPD,2)) || '-' || substr(PDSHPD,1,2) || '-' || substr(PDSHPD,3,2))) END) <= 4 and PDPKGU <> 0  and LENGTH(RTRIM(TRANSLATE(PDITEM, '*', ' 0123456789'))) = 0 and PDWHSE = $whse  group by PDWHSE, PDITEM, CASE WHEN PDBXSZ = 'CSE' THEN 'CSE' ELSE 'LSE' end, PDPKGU, PDSHPD order by PDWHSE asc , PDITEM asc , PDPKGU asc");
 $result->execute();
 $resultarray = $result->fetchAll(PDO::FETCH_NUM);
 
 
-$columns = 'FOMWHSE, FOMITEM, FOMPKGU, FOMDATE, FOMPQTY, ISFOM';
+$columns = 'FOMWHSE, FOMITEM, FOMCSLS, FOMPKGU, FOMDATE, FOMPQTY, ISFOM';
 
 
 $values = array();
@@ -43,11 +43,12 @@ do {
     while ($counter <= $maxrange) { //split into 5,000 lines segments to insert into merge table
         $whse = intval($resultarray[$counter][0]);
         $item = $resultarray[$counter][1];
-        $pkgu = intval($resultarray[$counter][2]);
-        $date = $resultarray[$counter][3];
-        $pickavg = intval($resultarray[$counter][4]);
+        $cselse = $resultarray[$counter][2];
+        $pkgu = intval($resultarray[$counter][3]);
+        $date = $resultarray[$counter][4];
+        $pickavg = intval($resultarray[$counter][5]);
 
-        $data[] = "($whse, $item, $pkgu, '$date', $pickavg, '$ISFOM')";
+        $data[] = "($whse, $item, '$cselse', $pkgu, '$date', $pickavg, '$ISFOM')";
         $counter += 1;
     }
 

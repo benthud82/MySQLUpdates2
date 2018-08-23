@@ -9,11 +9,11 @@
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 ini_set('max_allowed_packet', 999999999);
-include '../globalincludes/nahsi_mysql.php';  //conn1
+include '../connections/conn_custaudit.php';  //conn1
 //include '../globalincludes/ustxgpslotting_mysql.php';  //conn1
 include_once 'globalfunctions.php';
 
-$sqldelete = "TRUNCATE TABLE slotting.inbound_5key_merge ";
+$sqldelete = "TRUNCATE TABLE custaudit.inbound_5key_merge ";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -35,15 +35,15 @@ $sql1 = $conn1->prepare("SELECT
     PUTTMST as 5KEYPUTTMST,
 EDIRECDATE as 5KEYEDIDATE
 FROM
-slotting.putdate 
-JOIN slotting.podate on POITEM = PUTITEM and PORECN = PUTRECN and POPONM = PUTPONM and POPOLN = PUTPOLN  and PODCIO = PUTDCIN
-JOIN slotting.urfdate on URFPONM = POPONM and URFDCIN = PUTDCIN and URFRECN = PUTRECN
-JOIN slotting.recdate on PUTPONM = RECPONM and PUTRECN = RECRECN and PUTITEM = RECITEM and PUTPOLN = RECPOLN and PUTDCIN = RECDCIN
+custaudit.putdate 
+JOIN custaudit.podate on POITEM = PUTITEM and PORECN = PUTRECN and POPONM = PUTPONM and POPOLN = PUTPOLN  and PODCIO = PUTDCIN
+JOIN custaudit.urfdate on URFPONM = POPONM and URFDCIN = PUTDCIN and URFRECN = PUTRECN
+JOIN custaudit.recdate on PUTPONM = RECPONM and PUTRECN = RECRECN and PUTITEM = RECITEM and PUTPOLN = RECPOLN and PUTDCIN = RECDCIN
 
         LEFT OUTER JOIN
-    slotting.edidates ON edidates.EDIPONUMB = putdate.PUTPONM
+    custaudit.edidates ON edidates.EDIPONUMB = putdate.PUTPONM
         and edidates.EDIITEM = putdate.PUTITEM,
-    slotting.potype
+    custaudit.potype
  WHERE POPONM = POTYPEPO
 --         and PUTTMST BETWEEN NOW() - INTERVAL 5 DAY AND NOW()
 and PUTTMST >= '2017-01-01'
@@ -116,7 +116,7 @@ if (empty($values)) {
 break;
 }
 
-$sql = "INSERT INTO slotting.inbound_5key_merge ($columns) VALUES $values ";
+$sql = "INSERT INTO custaudit.inbound_5key_merge ($columns) VALUES $values ";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange +=4000;
@@ -124,8 +124,8 @@ $sql = "INSERT INTO slotting.inbound_5key_merge ($columns) VALUES $values ";
 
 
 //once merge table has been populated, insert on duplicate key update here.
-$sqlmerge2 = "INSERT INTO slotting.inbound_5key (5KEYVEND, 5KEYDC, 5KEYITEM, 5KEYVNADD, 5KEYCARR, 5KEYTYPE, 5KEYPONUM, 5KEYRECN, 5KEYDCIN, 5KEYPOTMST, 5KEYURFTMST, 5KEYRECTMST, 5KEYPUTTMST, 5KEYEDIDATE, 5KEYPOtoURF, 5KEYURFtoREC, 5KEYRECtoPUT, 5KEYEDItoURF)
-SELECT A.5KEYVEND, A.5KEYDC, A.5KEYITEM, A.5KEYVNADD, A.5KEYCARR, A.5KEYTYPE, A.5KEYPONUM, A.5KEYRECN, A.5KEYDCIN, A.5KEYPOTMST, A.5KEYURFTMST, A.5KEYRECTMST, A.5KEYPUTTMST, A.5KEYEDIDATE, A.5KEYPOtoURF, A.5KEYURFtoREC, A.5KEYRECtoPUT, A.5KEYEDItoURF FROM slotting.inbound_5key_merge A
+$sqlmerge2 = "INSERT INTO custaudit.inbound_5key (5KEYVEND, 5KEYDC, 5KEYITEM, 5KEYVNADD, 5KEYCARR, 5KEYTYPE, 5KEYPONUM, 5KEYRECN, 5KEYDCIN, 5KEYPOTMST, 5KEYURFTMST, 5KEYRECTMST, 5KEYPUTTMST, 5KEYEDIDATE, 5KEYPOtoURF, 5KEYURFtoREC, 5KEYRECtoPUT, 5KEYEDItoURF)
+SELECT A.5KEYVEND, A.5KEYDC, A.5KEYITEM, A.5KEYVNADD, A.5KEYCARR, A.5KEYTYPE, A.5KEYPONUM, A.5KEYRECN, A.5KEYDCIN, A.5KEYPOTMST, A.5KEYURFTMST, A.5KEYRECTMST, A.5KEYPUTTMST, A.5KEYEDIDATE, A.5KEYPOtoURF, A.5KEYURFtoREC, A.5KEYRECtoPUT, A.5KEYEDItoURF FROM custaudit.inbound_5key_merge A
 ON DUPLICATE KEY UPDATE  5KEYPOTMST = A.5KEYPOTMST, 5KEYURFTMST = A.5KEYURFTMST, 5KEYRECTMST = A.5KEYRECTMST, 5KEYPUTTMST = A.5KEYPUTTMST, 5KEYEDIDATE = A.5KEYEDIDATE, 5KEYPOtoURF = A.5KEYPOtoURF, 5KEYURFtoREC = A.5KEYURFtoREC, 5KEYRECtoPUT = A.5KEYRECtoPUT, 5KEYEDItoURF = A.5KEYEDItoURF;  ";
 $querymerge2 = $conn1->prepare($sqlmerge2);
 $querymerge2->execute();

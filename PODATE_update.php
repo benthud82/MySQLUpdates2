@@ -4,7 +4,7 @@
 
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
-include '../globalincludes/nahsi_mysql.php';  //conn1
+include '../connections/conn_custaudit.php';  //conn1
 include '../globalincludes/usa_asys.php';  //$aseriesconn
 //pull in array of key values from PODATE for last 185 days
 //this will be used to determine if need to add detail to PODATE_merge to update PODATE table
@@ -79,7 +79,7 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT IGNORE INTO slotting.podate ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO custaudit.podate ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange +=5000;
@@ -151,7 +151,7 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT IGNORE INTO slotting.podate ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO custaudit.podate ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange +=5000;

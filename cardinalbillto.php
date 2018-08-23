@@ -4,11 +4,11 @@
 //COUNT NUMBER OF LINES BY BILLTO/SHIPTO FOR CURRENT MONTH, CURRENT QUARTER, AND ROLLING 12 MONTHS
 
 set_time_limit(99999);
-include '../globalincludes/nahsi_mysql.php';
+include '../connections/conn_custaudit.php';  //conn1
 include '../globalincludes/usa_asys.php';
 
 
-$sqldelete = "TRUNCATE TABLE cardinalbillto";
+$sqldelete = "TRUNCATE TABLE custaudit.cardinalbillto";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -29,7 +29,7 @@ foreach ($custlistarray as $key => $value) {
     $BILLTONUM = $custlistarray[$key][0];
 
 
-    $sql = "INSERT IGNORE INTO cardinalbillto (BILLTONUM, TYPE) VALUES (:BILLTONUM, :TYPE)";
+    $sql = "INSERT IGNORE INTO custaudit.cardinalbillto (BILLTONUM, TYPE) VALUES (:BILLTONUM, :TYPE)";
 
     $query = $conn1->prepare($sql);
     $query->execute(array(':BILLTONUM' => $BILLTONUM, ':TYPE' => $custtype));
@@ -49,7 +49,7 @@ foreach ($TIGHTcustlistarray as $key => $value) {
     $BILLTONUM = $TIGHTcustlistarray[$key][0];
 
 
-    $sql = "INSERT IGNORE INTO cardinalbillto (BILLTONUM, TYPE) VALUES (:BILLTONUM, :TYPE)";
+    $sql = "INSERT IGNORE INTO custaudit.cardinalbillto (BILLTONUM, TYPE) VALUES (:BILLTONUM, :TYPE)";
 
     $query = $conn1->prepare($sql);
     $query->execute(array(':BILLTONUM' => $BILLTONUM, ':TYPE' => $custtype));

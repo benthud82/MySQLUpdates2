@@ -7,7 +7,7 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 ini_set('max_allowed_packet', 999999999);
 set_time_limit(99999);
-include '../globalincludes/nahsi_mysql.php';  //conn1
+include '../connections/conn_custaudit.php';  //conn1
 //include '../globalincludes/ustxgpslotting_mysql.php';  //conn1
 include '../globalincludes/usa_asys.php';  //$aseriesconn
 include '../globalfunctions/custdbfunctions.php';
@@ -17,7 +17,7 @@ $today = date('Y-m-d');
 
 $currentJdate = _gregdateto1yyddd($today);
 
-$sqldelete = "TRUNCATE TABLE slotting.salesplan_desc ";
+$sqldelete = "TRUNCATE TABLE custaudit.salesplan_desc ";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -87,7 +87,7 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT INTO slotting.salesplan_desc ($columns) VALUES $values ";
+    $sql = "INSERT INTO custaudit.salesplan_desc ($columns) VALUES $values ";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange += 10000;
@@ -95,11 +95,11 @@ do {
 
 
 //merge description shipto with this lising.
-$sqldelete2 = "TRUNCATE TABLE slotting.salesplan";
+$sqldelete2 = "TRUNCATE TABLE custaudit.salesplan";
 $querydelete2 = $conn1->prepare($sqldelete2);
 $querydelete2->execute();
 
-$sqlmerge = "insert into salesplan
-SELECT B.SALESPLAN, B.BILLTO, B.SHIPTO, SPDESC_DESC, ABAC01 ,ABAC02 ,ABAC03 ,ABAC04 ,ABAC05 ,ABAC06 ,ABAC07 ,ABAC08 ,ABAC09 ,ABAC10 ,ABAC11 ,ABAC12 ,ABAC13 ,ABAC14 ,ABAC15 ,ABAC16 ,ABAC17 ,ABAC18 ,ABAC19 ,ABAC20 ,ABAC21 ,ABAC22 ,ABAC23 ,ABAC24 ,ABAC25 ,ABAC26 ,ABAC27 ,ABAC28 ,ABAC29 ,ABAC30 FROM slotting.salesplan_desc A join salesplan_merge B on (A.SPDESC_SALESPLAN) = (B.SALESPLAN) and A.SPDESC_BILLTO = B.BILLTO";
+$sqlmerge = "insert into custaudit.salesplan
+SELECT B.SALESPLAN, B.BILLTO, B.SHIPTO, SPDESC_DESC, ABAC01 ,ABAC02 ,ABAC03 ,ABAC04 ,ABAC05 ,ABAC06 ,ABAC07 ,ABAC08 ,ABAC09 ,ABAC10 ,ABAC11 ,ABAC12 ,ABAC13 ,ABAC14 ,ABAC15 ,ABAC16 ,ABAC17 ,ABAC18 ,ABAC19 ,ABAC20 ,ABAC21 ,ABAC22 ,ABAC23 ,ABAC24 ,ABAC25 ,ABAC26 ,ABAC27 ,ABAC28 ,ABAC29 ,ABAC30 FROM custaudit.salesplan_desc A join salesplan_merge B on (A.SPDESC_SALESPLAN) = (B.SALESPLAN) and A.SPDESC_BILLTO = B.BILLTO";
 $querymerge2 = $conn1->prepare($sqlmerge);
 $querymerge2->execute();

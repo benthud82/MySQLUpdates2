@@ -3,7 +3,7 @@
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 //include_once '../globalincludes/nahsi_mysql.php';
-include_once '../globalincludes/ustxgpslotting_mysql.php';
+include '../connections/conn_custaudit.php';  //conn1
 include_once '../globalincludes/usa_asys.php';
 include_once '../globalfunctions/slottingfunctions.php';
 
@@ -33,7 +33,7 @@ $startdateyear = intval('1' . $startyear2 . $startday2);
 
 
 
-$sqldelete = "TRUNCATE massalgorithm_skuopt_recs";
+$sqldelete = "TRUNCATE custaudit.massalgorithm_skuopt_recs";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -43,7 +43,7 @@ $skuopt = $aseriesconn->prepare("SELECT       ORD_PWHS,     ITEM,    IMDESC,  SU
 $skuopt->execute();
 $skuoptarray = $skuopt->fetchAll(pdo::FETCH_ASSOC);
 
-$recentactioned = $conn1->prepare("SELECT concat(ma_whse, ma_item) as LOOKUPKEY FROM slotting.massalgorithm_actions WHERE ma_date >= DATE_ADD(CURDATE(), INTERVAL - 90 DAY) and ma_algorithm = 'SKUOPT';");
+$recentactioned = $conn1->prepare("SELECT concat(ma_whse, ma_item) as LOOKUPKEY FROM custaudit.massalgorithm_actions WHERE ma_date >= DATE_ADD(CURDATE(), INTERVAL - 90 DAY) and ma_algorithm = 'SKUOPT';");
 $recentactioned->execute();
 $recentactionedarray = $recentactioned->fetchAll(pdo::FETCH_ASSOC);
 
@@ -96,13 +96,13 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT IGNORE INTO slotting.massalgorithm_skuopt_recs ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO custaudit.massalgorithm_skuopt_recs ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange += 20000;
 } while ($counter <= $rowcount); //end of item by whse loop
 //populate skuopt summary table by whse/date
-$sql2 = "INSERT IGNORE INTO slotting.massalgorithm_skuopt_summary
+$sql2 = "INSERT IGNORE INTO custaudit.massalgorithm_skuopt_summary
                         SELECT 
                             CURDATE(),
                             skuopt_whse,
@@ -110,7 +110,7 @@ $sql2 = "INSERT IGNORE INTO slotting.massalgorithm_skuopt_summary
                             SUM(skuopt_monthunits) AS monthunits,
                             SUM(skuopt_yearunits) AS yearunits
                         FROM
-                            massalgorithm_skuopt_recs
+                            custaudit.massalgorithm_skuopt_recs
                         GROUP BY CURDATE() , skuopt_whse";
 $query2 = $conn1->prepare($sql2);
 $query2->execute();

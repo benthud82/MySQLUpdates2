@@ -4,7 +4,7 @@
 //determine the number of returns per invoice by ship to.  This does not provide detail.  Need to create another file to show indivudal detail.
 set_time_limit(99999);
 
-include '../globalincludes/nahsi_mysql.php';
+include '../connections/conn_custaudit.php';  //conn1
 //include '../globalincludes/ustxgpslotting_mysql.php';  //modelling connection
 include '../globalincludes/usa_asys.php';
 include '../globalfunctions/custdbfunctions.php';
@@ -16,7 +16,7 @@ $roll_quarter_start_1yyddd = _rollquarter1yyddd();  //call roll quarter function
 //Find first day for rolling 12 month 1yyddd
 $rolling_12_start_1yyddd = _rolling12startyyddd();  //call rolling start function to find start date for rolling 12 month sql
 
-$sqldelete = "TRUNCATE TABLE oscmerge";
+$sqldelete = "TRUNCATE TABLE custaudit.oscmerge";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -80,26 +80,26 @@ for ($startx = $startdatej; $startx <= $enddatej; $startx++) {
 
 
 
-        $sql = "INSERT IGNORE INTO oscmerge (ORDNUM, BILLTONUM, SHIPTONUM, ORDDATE, FILLRATECOUNT, LINECOUNT, DROPSHIPCOUNT) VALUES (:ORDNUM, :BILLTONUM, :SHIPTONUM, :ORDDATE, :FILLRATECOUNT, :LINECOUNT, :DROPSHIPCOUNT)";
+        $sql = "INSERT IGNORE INTO custaudit.oscmerge (ORDNUM, BILLTONUM, SHIPTONUM, ORDDATE, FILLRATECOUNT, LINECOUNT, DROPSHIPCOUNT) VALUES (:ORDNUM, :BILLTONUM, :SHIPTONUM, :ORDDATE, :FILLRATECOUNT, :LINECOUNT, :DROPSHIPCOUNT)";
         $query = $conn1->prepare($sql);
         $query->execute(array(':ORDNUM' => $ORDNUM, ':BILLTONUM' => $BILLTONUM, ':SHIPTONUM' => $SHIPTONUM, ':ORDDATE' => $ORDDATE, ':FILLRATECOUNT' => $FILLRATECOUNT, ':LINECOUNT' => $LINECOUNT, ':DROPSHIPCOUNT' => $DROPSHIPCOUNT));
     }
 }
 
 
-$sqlmerge = "INSERT INTO ordershipcomplete(ordershipcomplete.ORDNUM, ordershipcomplete.BILLTONUM, ordershipcomplete.SHIPTONUM, ordershipcomplete.ORDDATE, ordershipcomplete.FILLRATECOUNT, ordershipcomplete.LINECOUNT, ordershipcomplete.DROPSHIPCOUNT)
-SELECT oscmerge.ORDNUM, oscmerge.BILLTONUM, oscmerge.SHIPTONUM, oscmerge.ORDDATE, oscmerge.FILLRATECOUNT, oscmerge.LINECOUNT, oscmerge.DROPSHIPCOUNT FROM oscmerge
+$sqlmerge = "INSERT INTO custaudit.ordershipcomplete(ordershipcomplete.ORDNUM, ordershipcomplete.BILLTONUM, ordershipcomplete.SHIPTONUM, ordershipcomplete.ORDDATE, ordershipcomplete.FILLRATECOUNT, ordershipcomplete.LINECOUNT, ordershipcomplete.DROPSHIPCOUNT)
+SELECT oscmerge.ORDNUM, oscmerge.BILLTONUM, oscmerge.SHIPTONUM, oscmerge.ORDDATE, oscmerge.FILLRATECOUNT, oscmerge.LINECOUNT, oscmerge.DROPSHIPCOUNT FROM custaudit.oscmerge
 ON DUPLICATE KEY UPDATE ordershipcomplete.FILLRATECOUNT = oscmerge.FILLRATECOUNT, ordershipcomplete.LINECOUNT = oscmerge.LINECOUNT, ordershipcomplete.DROPSHIPCOUNT = oscmerge.DROPSHIPCOUNT;";
 $querymerge = $conn1->prepare($sqlmerge);
 $querymerge->execute();
 
 
-$sqldelete2 = "TRUNCATE TABLE oscbyshipto";
+$sqldelete2 = "TRUNCATE TABLE custaudit.oscbyshipto";
 $querydelete2 = $conn1->prepare($sqldelete2);
 $querydelete2->execute();
 
 //sql to update 
-$sqlmerge2 = "insert into oscbyshipto select 
+$sqlmerge2 = "insert into custaudit.oscbyshipto select 
     ordershipcomplete.BILLTONUM,
     ordershipcomplete.SHIPTONUM,
     sum(case
@@ -139,7 +139,7 @@ $sqlmerge2 = "insert into oscbyshipto select
         else 0
     end) as COMPLETE_ORDERS_R12_EXCLDS
 from
-    ordershipcomplete
+    custaudit.ordershipcomplete
 GROUP BY ordershipcomplete.BILLTONUM , ordershipcomplete.SHIPTONUM;";
 $querymerge2 = $conn1->prepare($sqlmerge2);
 $querymerge2->execute();

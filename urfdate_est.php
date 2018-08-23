@@ -7,7 +7,7 @@
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 ini_set('max_allowed_packet', 999999999);
-include_once '../globalincludes/nahsi_mysql.php';  //conn1
+include '../connections/conn_custaudit.php';  //conn1
 //include '../../globalincludes/usa_asys.php';  //conn1
 //include '../../globalincludes/ustxgpslotting_mysql.php';  //conn1
 include_once 'globalfunctions.php';
@@ -21,12 +21,12 @@ $minocc = 2;
 $date_format = 'Y-m-d';
 
 //pull in holiday dates to array
-$sqlholiday = $conn1->prepare("SELECT * from holidays");
+$sqlholiday = $conn1->prepare("SELECT * from custaudit.holidays");
 $sqlholiday->execute();
 $holidays = $sqlholiday->fetchAll(pdo::FETCH_COLUMN); //fetch column returns the date in a single dimensional array!
 
 
-$sqltruncate = "DELETE from slotting.urfdate_est WHERE OPENWHSE in $whse";
+$sqltruncate = "DELETE from custaudit.urfdate_est WHERE OPENWHSE in $whse";
 $querydelete = $conn1->prepare($sqltruncate);
 $querydelete->execute();
 
@@ -49,28 +49,28 @@ $sql1 = $conn1->prepare("SELECT
                             edi_2key_grouped.2KEYEDItoURFAVG_group as EDIAVG2KEY,
                             edi_2key_grouped.2KEYEDItoURFSTD_group as EDISTD2KEY
                         FROM
-                            slotting.openpo
+                            custaudit.openpo
                                 left join
-                            edidates ON EDIPONUMB = OPENPONUM
+                            custaudit.edidates ON EDIPONUMB = OPENPONUM
                                 and OPENITEM = EDIITEM
                                 left join
-                            inbound_4key_grouped ON inbound_4key_grouped.4KEYVEND_group = OPENSUPP
+                            custaudit.inbound_4key_grouped ON inbound_4key_grouped.4KEYVEND_group = OPENSUPP
                                 and inbound_4key_grouped.4KEYDC_group = OPENWHSE
                                 and inbound_4key_grouped.4KEYITEM_group = OPENITEM
                                 and inbound_4key_grouped.4KEYVNADD_group = OPENVENDADD
                                 and inbound_4key_grouped.4KEYCOUNT_group > 2
                                 left join
-                            edi_4key_grouped ON edi_4key_grouped.4KEYVEND_group = OPENSUPP
+                            custaudit.edi_4key_grouped ON edi_4key_grouped.4KEYVEND_group = OPENSUPP
                                 and edi_4key_grouped.4KEYDC_group = OPENWHSE
                                 and edi_4key_grouped.4KEYITEM_group = OPENITEM
                                 and edi_4key_grouped.4KEYVNADD_group = OPENVENDADD
                                 and edi_4key_grouped.4KEYCOUNT_group > 2
                                 left join
-                            inbound_2key_grouped ON inbound_2key_grouped.2KEYVEND_group = OPENSUPP
+                            custaudit.inbound_2key_grouped ON inbound_2key_grouped.2KEYVEND_group = OPENSUPP
                                 and inbound_2key_grouped.2KEYDC_group = OPENWHSE
                                 and inbound_2key_grouped.2KEYCOUNT_group > 2
                                 left join
-                            edi_2key_grouped ON edi_2key_grouped.2KEYVEND_group = OPENSUPP
+                            custaudit.edi_2key_grouped ON edi_2key_grouped.2KEYVEND_group = OPENSUPP
                                 and edi_2key_grouped.2KEYDC_group = OPENWHSE
                                 and edi_2key_grouped.2KEYCOUNT_group > 2
                         WHERE
@@ -165,7 +165,7 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT IGNORE INTO urfdate_est ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO custaudit.urfdate_est ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange +=100;
@@ -178,7 +178,7 @@ do {
 
 
 
-$insert3 = $conn1->prepare("INSERT INTO urfdate_est_hist
+$insert3 = $conn1->prepare("INSERT INTO custaudit.urfdate_est_hist
                                     (OPENSUPP, 
                                      OPENWHSE, 
                                      OPENITEM, 
@@ -195,7 +195,7 @@ $insert3 = $conn1->prepare("INSERT INTO urfdate_est_hist
                             SELECT 
                                 *
                             from
-                                urfdate_est
+                                custaudit.urfdate_est
                             ON DUPLICATE KEY UPDATE urfdate_est_hist.AVGURFDATE = urfdate_est.AVGURFDATE, urfdate_est_hist.MAXURFDATE = urfdate_est.MAXURFDATE, urfdate_est_hist.GROUPUSEDWCS = urfdate_est.GROUPUSEDWCS, urfdate_est_hist.AVGEDIDATE = urfdate_est.AVGEDIDATE, urfdate_est_hist.MAXEDIDATE = urfdate_est.MAXEDIDATE, urfdate_est_hist.GROUPUSEDEDI = urfdate_est.GROUPUSEDEDI, urfdate_est_hist.UPDATEDATETIME = urfdate_est.UPDATEDATETIME");
 $insert3->execute();
 
@@ -203,7 +203,7 @@ $insert3->execute();
 //Pull history to see if any items have been urfed and putaway.  Determine accuracy of estimate.  
 //Would the estimated date have been late?  Pull last 8 days of putaways and compare actual URF to estimated URF.
 
-$estimateerror = $conn1->prepare("INSERT ignore INTO estimate_error
+$estimateerror = $conn1->prepare("INSERT ignore INTO custaudit.estimate_error
                                    (URFVEND_EST,
                                     URFVNAD_EST,
                                     URFCARR_EST,
@@ -242,9 +242,9 @@ $estimateerror = $conn1->prepare("INSERT ignore INTO estimate_error
                                        GROUPUSEDEDI,
                                        UPDATEDATETIME
                                    FROM
-                                       urfdate,
-                                       putdate,
-                                       urfdate_est_hist
+                                       custaudit.urfdate,
+                                       custaudit.putdate,
+                                       custaudit.urfdate_est_hist
                                    where
                                         PUTTMST BETWEEN NOW() - INTERVAL 8 DAY AND NOW()
                                                    and OPENPONUM = URFPONM
@@ -255,7 +255,7 @@ $estimateerror = $conn1->prepare("INSERT ignore INTO estimate_error
                                            and exists( select 
                                                *
                                            from
-                                               urfdate_est_hist
+                                               custaudit.urfdate_est_hist
                                            where
                                                OPENPONUM = URFPONM
                                                    and OPENITEM = PUTITEM)");

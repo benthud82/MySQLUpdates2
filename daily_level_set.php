@@ -7,7 +7,7 @@
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 ini_set('max_allowed_packet', 999999999);
-include '../globalincludes/nahsi_mysql.php';  //conn1
+include '../connections/conn_custaudit.php';  //conn1
 include '../globalincludes/usa_esys.php';  //conn1
 //include '../../globalincludes/ustxgpslotting_mysql.php';  //conn1
 include_once '../globalincludes/usa_asys.php';
@@ -15,11 +15,11 @@ include 'globalfunctions.php';
 date_default_timezone_set('America/New_York');
 $today = date("Y-m-d H:i:s");
 
-$sqldelete = "TRUNCATE TABLE open_order_levelset";
+$sqldelete = "TRUNCATE TABLE custaudit.open_order_levelset";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 //Need to loop through for each of the pends?
-$uniqueitem = $eseriesconn->prepare("SELECT DISTINCT SDAITM, right(" . 'QC$DC' . ", 2) as PRIMDC                             
+$uniqueitem = $eseriesconn->prepare("SELECT DISTINCT CAST(SDAITM as char(7) CCSID 37) as SDAITM, right(" . 'QC$DC' . ", 2) as PRIMDC                             
                                     FROM
                                         HSIPDTA71.F5501,
                                         HSIPDTA71.F4211
@@ -37,12 +37,15 @@ foreach ($uniqueitemarray as $key => $value) {
     $onhandqtyarray = array();
 
     $orditem = $uniqueitemarray[$key]['SDAITM'];
+   
+
+    
     $whseprim = intval($uniqueitemarray[$key]['PRIMDC']);
 
 
 
     //file to pull in open POs by item.  Data in returned array $openpoarray
-    include '../CUSTVIS/GlobalData/openpobyitem_dc.php';  //check if primary DC has open PO
+    include 'openpobyitem_dc.php';  //check if primary DC has open PO
     if (strlen($whseprim) == 1 || $whseprim < 10) {
         $whseprim = '0' . $whseprim;
     }
@@ -66,7 +69,7 @@ foreach ($uniqueitemarray as $key => $value) {
         $allpendsarray = $allpends->fetchAll(pdo::FETCH_ASSOC);
     } else {
         $whseprim = 10;  //check to see if GIV has an open PO for the NSI item
-        include '../CUSTVIS/GlobalData/openpobyitem_dc.php';
+        include 'openpobyitem_dc.php';
         $whseprim = intval($uniqueitemarray[$key]['PRIMDC']);  //change back to primary DC
         if (strlen($whseprim) == 1 || $whseprim < 10) {
             $whseprim = '0' . $whseprim;
@@ -96,7 +99,7 @@ foreach ($uniqueitemarray as $key => $value) {
         continue;
     }
     //file to pull in availability at primary DC.  Purpose is to double check that new inventory is not available that can be used to allocated to BOs.  Data in returned array $onhandqtyarray
-    include '../CUSTVIS/GlobalData/allwhseonhandqty.php';
+    include 'allwhseonhandqty.php';
 
     //item/customer/order characteristics.  Can it be xshipped?  Is it a BO?  Is it a DS?  Why did it pend?
     //logic to build open_order_levelset table
@@ -173,7 +176,7 @@ foreach ($uniqueitemarray as $key => $value) {
             continue;
         }
 
-        $insert = $conn1->prepare("INSERT INTO slotting.open_order_levelset (ORDERDOCNUM, ITEMNUM, PRIMWHS, SUPPLYSOURCE, SUPPLYSOURCEID, ORDERQTY, PRIORNEEDQTY, ORDERDATETIME, UPDATEDATETIME, OPENWHSE, PODATE, AVGURFDATE, MAXURFDATE, GROUPUSEDWCS, AVGEDIDATE, MAXEDIDATE, GROUPUSEDEDI, CONFDATE) values ($ORDERDOCNUM, $orditem , $whseprim, '" . $source . "','" . $sourceID . "', $ORDQTY, $totalorderqty,'" . $ORDERDATETIME . "','" . $today . "', '" . $OPENWHSE . "', '" . $PODATE . "', '" . $AVGURFDATE . "', '" . $MAXURFDATE . "', '" . $GROUPUSEDWCS . "', '" . $AVGEDIDATE . "', '" . $MAXEDIDATE . "', '" . $GROUPUSEDEDI . "', '" . $CONFDATE . "')");
+        $insert = $conn1->prepare("INSERT INTO custaudit.open_order_levelset (ORDERDOCNUM, ITEMNUM, PRIMWHS, SUPPLYSOURCE, SUPPLYSOURCEID, ORDERQTY, PRIORNEEDQTY, ORDERDATETIME, UPDATEDATETIME, OPENWHSE, PODATE, AVGURFDATE, MAXURFDATE, GROUPUSEDWCS, AVGEDIDATE, MAXEDIDATE, GROUPUSEDEDI, CONFDATE) values ($ORDERDOCNUM, $orditem , $whseprim, '" . $source . "','" . $sourceID . "', $ORDQTY, $totalorderqty,'" . $ORDERDATETIME . "','" . $today . "', '" . $OPENWHSE . "', '" . $PODATE . "', '" . $AVGURFDATE . "', '" . $MAXURFDATE . "', '" . $GROUPUSEDWCS . "', '" . $AVGEDIDATE . "', '" . $MAXEDIDATE . "', '" . $GROUPUSEDEDI . "', '" . $CONFDATE . "')");
         $insert->execute();
 
         $totalorderqty += $ORDQTY;
@@ -181,7 +184,7 @@ foreach ($uniqueitemarray as $key => $value) {
 }
 
 //write live records to historical table for analysis purposes.  Make sure this is run after urfdate_est has been updated.
-$sqlmerge = "INSERT INTO open_order_levelset_history (ORDERDOCNUM, ITEMNUM, PRIMWHS, SUPPLYSOURCE, SUPPLYSOURCEID, ORDERQTY, PRIORNEEDQTY, ORDERDATETIME, UPDATEDATETIME, OPENWHSE, PODATE, AVGURFDATE, MAXURFDATE, GROUPUSEDWCS, AVGEDIDATE, MAXEDIDATE, GROUPUSEDEDI, CONFDATE)
-SELECT * FROM open_order_levelset;";
+$sqlmerge = "INSERT INTO custaudit.open_order_levelset_history (ORDERDOCNUM, ITEMNUM, PRIMWHS, SUPPLYSOURCE, SUPPLYSOURCEID, ORDERQTY, PRIORNEEDQTY, ORDERDATETIME, UPDATEDATETIME, OPENWHSE, PODATE, AVGURFDATE, MAXURFDATE, GROUPUSEDWCS, AVGEDIDATE, MAXEDIDATE, GROUPUSEDEDI, CONFDATE)
+SELECT * FROM custaudit.open_order_levelset;";
 $querymerge = $conn1->prepare($sqlmerge);
 $querymerge->execute();

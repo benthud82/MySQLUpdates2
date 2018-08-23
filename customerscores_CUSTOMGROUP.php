@@ -7,12 +7,11 @@ ini_set('memory_limit', '-1');
 ini_set('max_allowed_packet', 999999999);
 //include '../../globalincludes/usa_asys.php';
 include '../globalfunctions/custdbfunctions.php';
-//include '../globalincludes/nahsi_mysql.php';  //production connection
-include '../globalincludes/ustxgpslotting_mysql.php';  //modelling connection
+include '../connections/conn_custaudit.php';  //conn1
 
 
 
-$sqldelete = "TRUNCATE TABLE customerscores_custom_merge";
+$sqldelete = "TRUNCATE TABLE custaudit.customerscores_custom_merge";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -123,49 +122,49 @@ $result1 = $conn1->prepare("SELECT
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                 and RETURNDATE >= $roll_month_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) as shippingacc_monthly,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                 and RETURNDATE >= $roll_quarter_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) as shippingacc_quarter,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                 and RETURNDATE >= $rolling_12_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) as shippingacc_rolling12,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('CRID' , 'TDNR')
                 and RETURNDATE >= $roll_month_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) as damages_monthly,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('CRID' , 'TDNR')
                 and RETURNDATE >= $roll_quarter_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) as damages_quarter,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('CRID' , 'TDNR')
                 and RETURNDATE >= $rolling_12_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) as damages_rolling12,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('EXPR' , 'SDAT',
                 'TEMP',
@@ -179,7 +178,7 @@ $result1 = $conn1->prepare("SELECT
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('EXPR' , 'SDAT',
                 'TEMP',
@@ -193,7 +192,7 @@ $result1 = $conn1->prepare("SELECT
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('EXPR' , 'SDAT',
                 'TEMP',
@@ -209,7 +208,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                         and RETURNDATE >= $roll_month_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) * sum(CUR_MONTH_LINES) = 0
@@ -218,7 +217,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                     and RETURNDATE >= $roll_month_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) / sum(CUR_MONTH_LINES))
@@ -228,7 +227,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                         and RETURNDATE >= $roll_quarter_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) * sum(CUR_QTR_LINES) = 0
@@ -237,7 +236,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                     and RETURNDATE >= $roll_quarter_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) / sum(CUR_QTR_LINES))
@@ -247,7 +246,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                         and RETURNDATE >= $rolling_12_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) * sum(ROLL_12_LINES) = 0
@@ -256,7 +255,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
             WHERE 
                 RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                     and RETURNDATE >= $rolling_12_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) / sum(ROLL_12_LINES))
@@ -266,7 +265,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('CRID' , 'TDNR')
                         and RETURNDATE >= $roll_month_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) * sum(CUR_MONTH_LINES) = 0
@@ -275,7 +274,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('CRID' , 'TDNR')
                     and RETURNDATE >= $roll_month_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) / sum(CUR_MONTH_LINES))
@@ -285,7 +284,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('CRID' , 'TDNR')
                         and RETURNDATE >= $roll_quarter_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) * sum(CUR_QTR_LINES) = 0
@@ -294,7 +293,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('CRID' , 'TDNR')
                     and RETURNDATE >= $roll_quarter_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) / sum(CUR_QTR_LINES))
@@ -304,7 +303,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
                 WHERE 
                     RETURNCODE in ('CRID' , 'TDNR')
                         and RETURNDATE >= $rolling_12_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) * sum(ROLL_12_LINES) = 0
@@ -313,7 +312,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('CRID' , 'TDNR')
                     and RETURNDATE >= $rolling_12_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) / sum(ROLL_12_LINES))
@@ -323,7 +322,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('EXPR' , 'SDAT',
                         'TEMP',
@@ -339,7 +338,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('EXPR' , 'SDAT',
                     'TEMP',
@@ -356,7 +355,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('EXPR' , 'SDAT',
                         'TEMP',
@@ -372,7 +371,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('EXPR' , 'SDAT',
                     'TEMP',
@@ -389,7 +388,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('EXPR' , 'SDAT',
                         'TEMP',
@@ -405,7 +404,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-               custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
+               custaudit.custreturns R JOIN scorecard_groupingdetail Q on Q.group_BILLTO = R.BILLTONUM and Q.group_SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('EXPR' , 'SDAT',
                     'TEMP',
@@ -418,11 +417,11 @@ $result1 = $conn1->prepare("SELECT
                     and RETURNDATE >= $rolling_12_start_1yyddd and Q.group_MASTERID = S.group_MASTERID) / sum(ROLL_12_LINES))
     end) as ADDSCACCPERCR12
 FROM
-    invlinesbyshipto L
+    custaudit.invlinesbyshipto L
         LEFT JOIN
-    scorecard_groupingdetail S ON S.group_BILLTO = L.BILLTONUM
+    custaudit.scorecard_groupingdetail S ON S.group_BILLTO = L.BILLTONUM
         AND S.group_SHIPTO = L.SHIPTONUM,
-    fillratebyshipto F
+    custaudit.fillratebyshipto F
 WHERE
     F.BILLTO = L.BILLTONUM
         and F.SHIPTO = L.SHIPTONUM
@@ -502,8 +501,8 @@ foreach ($masterdisplayarray as $key => $value) {
     sum(ORDERS_COMPLETE_QTR_EXCLDS) / sum(TOTAL_ORDERS_QTR) AS QTROSC_EXCLDS,
     sum(ORDERS_COMPLETE_R12_EXCLDS) / sum(TOTAL_ORDERS_R12) AS R12OSC_EXCLDS
 FROM
-    oscbyshipto C
-    JOIN scorecard_groupingdetail  on group_BILLTO = BILLTONUM and group_SHIPTO = SHIPTONUM
+    custaudit.oscbyshipto C
+    JOIN custaudit.scorecard_groupingdetail  on group_BILLTO = BILLTONUM and group_SHIPTO = SHIPTONUM
 WHERE group_MASTERID = $GROUPID
 GROUP BY group_MASTERID");
     $result2->execute();
@@ -533,7 +532,7 @@ GROUP BY group_MASTERID");
     //SQL Query for trend
 
     $xcordarray = array();
-    $resulttrend = $conn1->prepare("SELECT * FROM slotting.custscoresbyday_custom WHERE RECORDDATE BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW() and GROUPID = $GROUPID ORDER BY RECORDDATE asc");
+    $resulttrend = $conn1->prepare("SELECT * FROM custaudit.custscoresbyday_custom WHERE RECORDDATE BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW() and GROUPID = $GROUPID ORDER BY RECORDDATE asc");
     $resulttrend->execute();
     $resultarraytrend = $resulttrend->fetchAll(PDO::FETCH_ASSOC);
     $trendarraycount = count($resultarraytrend);
@@ -1194,46 +1193,46 @@ do {
     }
     
     
-    $sql = "INSERT IGNORE INTO slotting.customerscores_custom_merge ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO custaudit.customerscores_custom_merge ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     
-    $sql2 = "INSERT IGNORE INTO slotting.custscoresbyday_custom ($columns2) VALUES $values2";
+    $sql2 = "INSERT IGNORE INTO custaudit.custscoresbyday_custom ($columns2) VALUES $values2";
     $query2 = $conn1->prepare($sql2);
     $query2->execute();
     $maxrange +=1000;
 } while ($counter <= $rowcount);
 
 
-$sqldelete2 = "TRUNCATE TABLE customerscores_custom";
+$sqldelete2 = "TRUNCATE TABLE custaudit.customerscores_custom";
 $querydelete2 = $conn1->prepare($sqldelete2);
 $querydelete2->execute();
 
 
-$sqlmerge = "INSERT INTO customerscores_custom () SELECT * FROM customerscores_custom_merge;";
+$sqlmerge = "INSERT INTO custaudit.customerscores_custom () SELECT * FROM customerscores_custom_merge;";
 $querymerge = $conn1->prepare($sqlmerge);
 $querymerge->execute();
 
-$sqldelete4 = "TRUNCATE TABLE scorecard_display_custom";
+$sqldelete4 = "TRUNCATE TABLE custaudit.scorecard_display_custom";
 $querydelete4 = $conn1->prepare($sqldelete4);
 $querydelete4->execute();
 
-$sqlmerge2 = "INSERT INTO scorecard_display_custom (GROUPID,RECORDDATE,SCOREMONTH,SCOREQUARTER,SCOREROLL12,SLOPE30DAY,SLOPE90DAY,SLOPE12MON,LINESMONTH,LINESQUARTER,LINESROLL12,SLOPELINES30DAY,SLOPELINES90DAY,SLOPELINES12MON,BOMONTH,BOQUARTER,BOROLL12,SLOPEBO30DAY,SLOPEBO90DAY,SLOPEBO12MON,BEMONTH,BEQUARTER,BEROLL12,SLOPEBE30DAY,SLOPEBE90DAY,SLOPEBE12MON,DMONTH,DQUARTER,DROLL12,SLOPED30DAY,SLOPED90DAY,SLOPED12MON,XDMONTH,XDQUARTER,XDROLL12,SLOPEXD30DAY,SLOPEXD90DAY,SLOPEXD12MON,XEMONTH,XEQUARTER,XEROLL12,SLOPEXE30DAY,SLOPEXE90DAY,SLOPEXE12MON,XSMONTH,XSQUARTER,XSROLL12,SLOPEXS30DAY,SLOPEXS90DAY,SLOPEXS12MON,BEFFRMNT,AFTFRMNT,BEFFRQTR,AFTFRQTR,BEFFRR12,AFTFRR12,SLOPEBEFFRMNT,SLOPEAFTFRMNT,SLOPEBEFFRQTR,SLOPEAFTFRQTR,SLOPEAFTFRR12,SLOPEBEFFRR12,SHIPACCMONTH,SHIPACCQUARTER,SHIPACCROLL12,SLOPESHIPACCMONTH,SLOPESHIPACCQUARTER,SLOPESHIPACCROLL12,DMGACCMONTH,DMGACCQUARTER,DMGACCROLL12,SLOPEDMGACCMONTH,SLOPEDMGACCQUARTER,SLOPEDMGACCROLL12,ADDSCACCMONTH,ADDSCACCQUARTER,ADDSCACCROLL12,SLOPEADDSCACCMONTH,SLOPEADDSCACCQUARTER,SLOPEADDSCACCROLL12,OSCMONTH,OSCQUARTER,OSCROLL12, SLOPEOSCMONTH, SLOPEOSCQUARTER, SLOPEOSCROLL12, SCOREMONTH_EXCLDS, SCOREQUARTER_EXCLDS, SCOREROLL12_EXCLDS, SLOPE30DAY_EXCLDS, SLOPE90DAY_EXCLDS, SLOPE12MON_EXCLDS, BEFFRMNT_EXCLDS, AFTFRMNT_EXCLDS, BEFFRQTR_EXCLDS, AFTFRQTR_EXCLDS, BEFFRR12_EXCLDS, AFTFRR12_EXCLDS, SLOPEBEFFRMNT_EXCLDS, SLOPEAFTFRMNT_EXCLDS, SLOPEBEFFRQTR_EXCLDS, SLOPEAFTFRQTR_EXCLDS, SLOPEAFTFRR12_EXCLDS, SLOPEBEFFRR12_EXCLDS, OSCMONTH_EXCLDS, OSCQUARTER_EXCLDS, OSCROLL12_EXCLDS, SLOPEOSCMONTH_EXCLDS, SLOPEOSCQUARTER_EXCLDS, SLOPEOSCROLL12_EXCLDS, PBFRMNT,PBFRQTR,  PBFRR12, SLOPEPBFRMNT, SLOPEPBFRQTR, SLOPEPBFRR12, TOTMONTHCOGS, TOTMONTHSALES, TOTQTRCOGS, TOTQTRSALES, TOTR12COGS, TOTR12SALES, CUR_MNT_P_LINES, CUR_QTR_P_LINES, R12_P_LINES)
+$sqlmerge2 = "INSERT INTO custaudit.scorecard_display_custom (GROUPID,RECORDDATE,SCOREMONTH,SCOREQUARTER,SCOREROLL12,SLOPE30DAY,SLOPE90DAY,SLOPE12MON,LINESMONTH,LINESQUARTER,LINESROLL12,SLOPELINES30DAY,SLOPELINES90DAY,SLOPELINES12MON,BOMONTH,BOQUARTER,BOROLL12,SLOPEBO30DAY,SLOPEBO90DAY,SLOPEBO12MON,BEMONTH,BEQUARTER,BEROLL12,SLOPEBE30DAY,SLOPEBE90DAY,SLOPEBE12MON,DMONTH,DQUARTER,DROLL12,SLOPED30DAY,SLOPED90DAY,SLOPED12MON,XDMONTH,XDQUARTER,XDROLL12,SLOPEXD30DAY,SLOPEXD90DAY,SLOPEXD12MON,XEMONTH,XEQUARTER,XEROLL12,SLOPEXE30DAY,SLOPEXE90DAY,SLOPEXE12MON,XSMONTH,XSQUARTER,XSROLL12,SLOPEXS30DAY,SLOPEXS90DAY,SLOPEXS12MON,BEFFRMNT,AFTFRMNT,BEFFRQTR,AFTFRQTR,BEFFRR12,AFTFRR12,SLOPEBEFFRMNT,SLOPEAFTFRMNT,SLOPEBEFFRQTR,SLOPEAFTFRQTR,SLOPEAFTFRR12,SLOPEBEFFRR12,SHIPACCMONTH,SHIPACCQUARTER,SHIPACCROLL12,SLOPESHIPACCMONTH,SLOPESHIPACCQUARTER,SLOPESHIPACCROLL12,DMGACCMONTH,DMGACCQUARTER,DMGACCROLL12,SLOPEDMGACCMONTH,SLOPEDMGACCQUARTER,SLOPEDMGACCROLL12,ADDSCACCMONTH,ADDSCACCQUARTER,ADDSCACCROLL12,SLOPEADDSCACCMONTH,SLOPEADDSCACCQUARTER,SLOPEADDSCACCROLL12,OSCMONTH,OSCQUARTER,OSCROLL12, SLOPEOSCMONTH, SLOPEOSCQUARTER, SLOPEOSCROLL12, SCOREMONTH_EXCLDS, SCOREQUARTER_EXCLDS, SCOREROLL12_EXCLDS, SLOPE30DAY_EXCLDS, SLOPE90DAY_EXCLDS, SLOPE12MON_EXCLDS, BEFFRMNT_EXCLDS, AFTFRMNT_EXCLDS, BEFFRQTR_EXCLDS, AFTFRQTR_EXCLDS, BEFFRR12_EXCLDS, AFTFRR12_EXCLDS, SLOPEBEFFRMNT_EXCLDS, SLOPEAFTFRMNT_EXCLDS, SLOPEBEFFRQTR_EXCLDS, SLOPEAFTFRQTR_EXCLDS, SLOPEAFTFRR12_EXCLDS, SLOPEBEFFRR12_EXCLDS, OSCMONTH_EXCLDS, OSCQUARTER_EXCLDS, OSCROLL12_EXCLDS, SLOPEOSCMONTH_EXCLDS, SLOPEOSCQUARTER_EXCLDS, SLOPEOSCROLL12_EXCLDS, PBFRMNT,PBFRQTR,  PBFRR12, SLOPEPBFRMNT, SLOPEPBFRQTR, SLOPEPBFRR12, TOTMONTHCOGS, TOTMONTHSALES, TOTQTRCOGS, TOTQTRSALES, TOTR12COGS, TOTR12SALES, CUR_MNT_P_LINES, CUR_QTR_P_LINES, R12_P_LINES)
 
 SELECT 
     SLOPE . *, TOTMONTHCOGS, TOTMONTHSALES, TOTQTRCOGS, TOTQTRSALES, TOTR12COGS, TOTR12SALES, CUR_MNT_P_LINES, CUR_QTR_P_LINES, R12_P_LINES 
 FROM
-    slotting.customerscores_custom as SCORES
+    custaudit.customerscores_custom as SCORES
         inner JOIN
     (SELECT 
         t1 . *
     FROM
-        slotting.custscoresbyday_custom t1
+        custaudit.custscoresbyday_custom t1
     WHERE
         t1.RECORDDATE = (SELECT 
                 MAX(t2.RECORDDATE)
             FROM
-                slotting.custscoresbyday_custom t2
+                custaudit.custscoresbyday_custom t2
             WHERE
                 t2.GROUPID = t1.GROUPID
             HAVING count(t2.GROUPID) >= 1)) as SLOPE ON (SCORES.GROUPID = SLOPE.GROUPID)";
@@ -1241,7 +1240,7 @@ $querymerge2 = $conn1->prepare($sqlmerge2);
 $querymerge2->execute();
 
 //Add average scores to summary table.
-$sqlmerge3 = "INSERT IGNORE INTO scoreavg_custom
-SELECT RECORDDATE, avg(scoremonth), avg(scorequarter), avg(scoreroll12) FROM slotting.custscoresbyday_custom WHERE RECORDDATE  >= DATE_ADD(CURDATE(), INTERVAL -5 DAY) GROUP BY RECORDDATE ;";
+$sqlmerge3 = "INSERT IGNORE INTO custaudit.scoreavg_custom
+SELECT RECORDDATE, avg(scoremonth), avg(scorequarter), avg(scoreroll12) FROM custaudit.custscoresbyday_custom WHERE RECORDDATE  >= DATE_ADD(CURDATE(), INTERVAL -5 DAY) GROUP BY RECORDDATE ;";
 $querymerge3 = $conn1->prepare($sqlmerge3);
 $querymerge3->execute();

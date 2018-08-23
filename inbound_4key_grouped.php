@@ -6,10 +6,10 @@
 
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
-include '../globalincludes/nahsi_mysql.php';  //conn1
+include '../connections/conn_custaudit.php';  //conn1
 //SQL to pull date/times by 5key
 
-$sqltruncate = "TRUNCATE slotting.inbound_4key_grouped";
+$sqltruncate = "TRUNCATE custaudit.inbound_4key_grouped";
 $querydelete = $conn1->prepare($sqltruncate);
 $querydelete->execute();
 
@@ -72,7 +72,7 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT IGNORE INTO inbound_4key_grouped ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO custaudit.inbound_4key_grouped ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange +=10000;
@@ -83,7 +83,7 @@ do {
 
 
 
-$sqltruncate2 = "TRUNCATE slotting.edi_4key_grouped";
+$sqltruncate2 = "TRUNCATE custaudit.edi_4key_grouped";
 $querydelete2 = $conn1->prepare($sqltruncate2);
 $querydelete2->execute();
 
@@ -139,7 +139,7 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT IGNORE INTO edi_4key_grouped ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO custaudit.edi_4key_grouped ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange +=10000;

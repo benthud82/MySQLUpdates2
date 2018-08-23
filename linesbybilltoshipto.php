@@ -55,11 +55,11 @@ $columns = 'BILLTONUM, SHIPTONUM, CUR_MONTH_LINES, CUR_MONTH_COGS, CUR_MONTH_SAL
 $maxrange = 9999;
 $counter = 0;
 $rowcount = count($linesarray);
-include '../globalincludes/nahsi_mysql.php';
+include '../connections/conn_custaudit.php';  //conn1
 //include '../globalincludes/ustxgpslotting_mysql.php';
 
 
-$sqldelete1 = "TRUNCATE TABLE invlinesbyshiptomerge";
+$sqldelete1 = "TRUNCATE TABLE custaudit.invlinesbyshiptomerge";
 $querydelete1 = $conn1->prepare($sqldelete1);
 $querydelete1->execute();
 do {
@@ -99,7 +99,7 @@ do {
         break;
     }
 
-    $sql = "INSERT IGNORE INTO slotting.invlinesbyshiptomerge ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO custaudit.invlinesbyshiptomerge ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange +=10000;
@@ -107,13 +107,13 @@ do {
 
 
 
-$sqldelete = "TRUNCATE TABLE invlinesbyshipto";
+$sqldelete = "TRUNCATE TABLE custaudit.invlinesbyshipto";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
 
-$sqlmerge = "INSERT INTO invlinesbyshipto (invlinesbyshipto.BILLTONUM, invlinesbyshipto.SHIPTONUM, invlinesbyshipto.CUR_MONTH_LINES, invlinesbyshipto.CUR_MONTH_COGS, invlinesbyshipto.CUR_MONTH_SALES, invlinesbyshipto.CUR_QTR_LINES, invlinesbyshipto.CUR_QTR_COGS, invlinesbyshipto.CUR_QTR_SALES, invlinesbyshipto.ROLL_12_LINES, invlinesbyshipto.ROLL_12_COGS, invlinesbyshipto.ROLL_12_SALES, invlinesbyshipto.BILL_TO_NAME, invlinesbyshipto.SHIP_TO_NAME)
-SELECT * FROM slotting.invlinesbyshiptomerge;";
+$sqlmerge = "INSERT INTO custaudit.invlinesbyshipto (invlinesbyshipto.BILLTONUM, invlinesbyshipto.SHIPTONUM, invlinesbyshipto.CUR_MONTH_LINES, invlinesbyshipto.CUR_MONTH_COGS, invlinesbyshipto.CUR_MONTH_SALES, invlinesbyshipto.CUR_QTR_LINES, invlinesbyshipto.CUR_QTR_COGS, invlinesbyshipto.CUR_QTR_SALES, invlinesbyshipto.ROLL_12_LINES, invlinesbyshipto.ROLL_12_COGS, invlinesbyshipto.ROLL_12_SALES, invlinesbyshipto.BILL_TO_NAME, invlinesbyshipto.SHIP_TO_NAME)
+SELECT * FROM custaudit.invlinesbyshiptomerge;";
 $querymerge = $conn1->prepare($sqlmerge);
 $querymerge->execute();
 

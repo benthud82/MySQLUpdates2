@@ -8,10 +8,10 @@ ini_set('memory_limit', '-1');
 ini_set('max_allowed_packet', 999999999);
 include '../globalincludes/usa_asys.php';
 include '../globalfunctions/custdbfunctions.php';
-include '../globalincludes/nahsi_mysql.php';  //production connection
+include '../connections/conn_custaudit.php';  //conn1
 //include '../globalincludes/ustxgpslotting_mysql.php';  //modelling connection
 
-$sqldelete2 = "TRUNCATE TABLE delivery_dates_merge";
+$sqldelete2 = "TRUNCATE TABLE custaudit.delivery_dates_merge";
 $querydelete2 = $conn1->prepare($sqldelete2);
 $querydelete2->execute();
 
@@ -19,7 +19,7 @@ $startdate = _roll10dayyyyymmdd();
 //$startdate = _roll12yyyymmdd();
 
 
-$dates = $aseriesconn->prepare("SELECT DISTINCT XHDDAT FROM A.HSIPCORDTA.NOTHDR WHERE  XHDDAT  >= 20170405");
+$dates = $aseriesconn->prepare("SELECT DISTINCT XHDDAT FROM A.HSIPCORDTA.NOTHDR WHERE  XHDDAT  >= $startdate");
 $dates->execute();
 $datesarray = $dates->fetchAll(pdo::FETCH_COLUMN);
 
@@ -28,7 +28,7 @@ $columns = 'WHSE, WCSNUM, WONUM, BOXNUM, SHIPZONE, SHIPCLASS, TRACER, BOXSIZE, H
 
 
 foreach ($datesarray as $value) {
-    $sqldelete = "TRUNCATE TABLE delivery_dates_only";
+    $sqldelete = "TRUNCATE TABLE custaudit.delivery_dates_only";
     $querydelete = $conn1->prepare($sqldelete);
     $querydelete->execute();
 
@@ -103,7 +103,7 @@ foreach ($datesarray as $value) {
             break;
         }
 
-        $sql = "INSERT IGNORE INTO slotting.delivery_dates_only ($columns) VALUES $values";
+        $sql = "INSERT IGNORE INTO custaudit.delivery_dates_only ($columns) VALUES $values";
         $query = $conn1->prepare($sql);
         $query->execute();
 
@@ -126,25 +126,25 @@ foreach ($datesarray as $value) {
                                                                                     ELSE 0
                                                                                 END AS LATE
                                                                             FROM
-                                                                                slotting.delivery_dates_only A
+                                                                                custaudit.delivery_dates_only A
                                                                                     JOIN
-                                                                                slotting.transit_times B ON A.WHSE = B.SHIPDC
+                                                                                custaudit.transit_times B ON A.WHSE = B.SHIPDC
                                                                                     AND A.ZIPCODE = B.ZIPCODE");
         $dayscalc->execute();
 
 
         //once merge table has been populated, insert on duplicate key update here.
-        $sqlmerge2 = "INSERT INTO slotting.delivery_dates (WHSE, WCSNUM, WONUM, BOXNUM, SHIPZONE, SHIPCLASS, TRACER, BOXSIZE, HAZCLASS, BOXLINES, BOXWEIGHT, ZIPCODE, BOXVALUE, DELIVERDATE, DELIVERTIME, LICENSE, CARRIER, SHIPDATE, SHIPTIME, BILLTO, SHIPTO, SHOULDDAYS, ACTUALDAYS, LATE)
-                                    SELECT A.WHSE, A.WCSNUM, A.WONUM, A.BOXNUM, A.SHIPZONE, A.SHIPCLASS, A.TRACER, A.BOXSIZE, A.HAZCLASS, A.BOXLINES, A.BOXWEIGHT, A.ZIPCODE, A.BOXVALUE, A.DELIVERDATE, A.DELIVERTIME, A.LICENSE, A.CARRIER, A.SHIPDATE, A.SHIPTIME, A.BILLTO, A.SHIPTO, A.SHOULDDAYS, A.ACTUALDAYS, A.LATE FROM slotting.delivery_dates_merge A
+        $sqlmerge2 = "INSERT INTO custaudit.delivery_dates (WHSE, WCSNUM, WONUM, BOXNUM, SHIPZONE, SHIPCLASS, TRACER, BOXSIZE, HAZCLASS, BOXLINES, BOXWEIGHT, ZIPCODE, BOXVALUE, DELIVERDATE, DELIVERTIME, LICENSE, CARRIER, SHIPDATE, SHIPTIME, BILLTO, SHIPTO, SHOULDDAYS, ACTUALDAYS, LATE)
+                                    SELECT A.WHSE, A.WCSNUM, A.WONUM, A.BOXNUM, A.SHIPZONE, A.SHIPCLASS, A.TRACER, A.BOXSIZE, A.HAZCLASS, A.BOXLINES, A.BOXWEIGHT, A.ZIPCODE, A.BOXVALUE, A.DELIVERDATE, A.DELIVERTIME, A.LICENSE, A.CARRIER, A.SHIPDATE, A.SHIPTIME, A.BILLTO, A.SHIPTO, A.SHOULDDAYS, A.ACTUALDAYS, A.LATE FROM custaudit.delivery_dates_merge A
                                     ON DUPLICATE KEY UPDATE  DELIVERDATE = A.DELIVERDATE,  DELIVERTIME = A.DELIVERTIME, SHOULDDAYS = A.SHOULDDAYS, ACTUALDAYS = A.ACTUALDAYS, LATE = A.LATE;  ";
         $querymerge2 = $conn1->prepare($sqlmerge2);
         $querymerge2->execute();
 
-        $sqldelete2 = "TRUNCATE TABLE delivery_dates_merge";
+        $sqldelete2 = "TRUNCATE TABLE custaudit.delivery_dates_merge";
         $querydelete2 = $conn1->prepare($sqldelete2);
         $querydelete2->execute();
 
-        $sqldelete3 = "TRUNCATE TABLE delivery_dates_only";
+        $sqldelete3 = "TRUNCATE TABLE custaudit.delivery_dates_only";
         $querydelete3 = $conn1->prepare($sqldelete3);
         $querydelete3->execute();
 

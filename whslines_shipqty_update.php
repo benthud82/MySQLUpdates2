@@ -2,13 +2,13 @@
 
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
-include_once '../globalincludes/nahsi_mysql.php';
+include '../connections/conn_custaudit.php';  //conn1
 //include_once '../globalincludes/ustxgpslotting_mysql.php';
 include_once '../globalincludes/usa_asys.php';
 //include_once '../globalincludes/newcanada_asys.php';
 
 
-$sqldelete = "TRUNCATE slotting.whslines";
+$sqldelete = "TRUNCATE custaudit.whslines";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -57,7 +57,7 @@ foreach ($whsearray as $whssel) {
         if (empty($values)) {
             break;
         }
-        $sql = "INSERT IGNORE INTO slotting.whslines ($columns) VALUES $values";
+        $sql = "INSERT IGNORE INTO custaudit.whslines ($columns) VALUES $values";
         $query = $conn1->prepare($sql);
         $query->execute();
         $maxrange += 10000;

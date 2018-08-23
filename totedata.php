@@ -168,10 +168,11 @@ foreach ($whsearray as $whsesel) {
                                                                                              TRIM(substr(NVFLAT,33,3)) as BOXLINES, 
                                                                                              TRIM(substr(NVFLAT,46,10)) as TSM, 
                                                                                              TRIM(substr(NVFLAT,56,1)) as AUDITPACK, 
-                                                                                             TRIM(substr(NVFLAT,57,1)) as SPEEDPACK, 
+                                                                                             CASE WHEN SUBSTR(FLDCTX, 4,1) = 'Y' THEN 'Y' else 'N' end as SPEEDPACK, 
                                                                                              TRIM(substr(NVFLAT,62,1)) as HELPPACK, 
                                                                                              TRIM(substr(NVFLAT,137,19))  as ENDTIME                        
                                                                                 FROM HSIPCORDTA.NOFNVI 
+                                                                                LEFT JOIN QGPL.HLPVDL on SUBSTR(FLDCDE, 5,5) = TRIM(substr(NVFLAT,46,10))                                                   
                                                                                 WHERE TRIM(substring(NVFLAT,3,2)) = '0$whsesel' 
                                                                                               and TRIM(substr(NVFLAT,137,10)) <> ' ' 
                                                                                               and TRIM(substr(NVFLAT,137,10)) = CURDATE()");

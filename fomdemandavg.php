@@ -18,11 +18,11 @@ $querydelete->execute();
 
 
 $whsearray = array(2, 3, 6, 7, 9);
-$columns = 'FOMAVGWHSE, FOMAVGITEM, FOMAVGPKGU, FOMAVGAVG, FOMAVGSTD, FOMAVGCOUNT';
+$columns = 'FOMAVGWHSE, FOMAVGITEM, FOMAVGCSLS, FOMAVGPKGU, FOMAVGAVG, FOMAVGSTD, FOMAVGCOUNT';
 foreach ($whsearray as $whse) {
 
 
-    $result1 = $conn1->prepare("SELECT FOMWHSE, FOMITEM, FOMPKGU, AVG(FOMPQTY) as AVGQTY, STD(FOMPQTY) as STDQTY, COUNT(FOMPQTY) as COUNTQTY FROM fomraw WHERE ISFOM = 'Y' and FOMWHSE = $whse GROUP BY FOMWHSE, FOMITEM, FOMPKGU ORDER BY FOMWHSE ASC, FOMITEM ASC, FOMPKGU ASC");
+    $result1 = $conn1->prepare("SELECT FOMWHSE, FOMITEM, FOMCSLS, FOMPKGU, AVG(FOMPQTY) as AVGQTY, STD(FOMPQTY) as STDQTY, COUNT(FOMPQTY) as COUNTQTY FROM fomraw WHERE ISFOM = 'Y' and FOMWHSE = $whse GROUP BY FOMWHSE, FOMITEM, FOMCSLS, FOMPKGU ORDER BY FOMWHSE ASC, FOMITEM ASC, FOMCSLS ASC, FOMPKGU ASC");
     $result1->execute();
     $resultarray = $result1->fetchAll();
 
@@ -42,12 +42,13 @@ foreach ($whsearray as $whse) {
         while ($counter <= $maxrange) { //split into 5,000 lines segments to insert into merge table
             $whse = intval($resultarray[$counter]['FOMWHSE']);
             $item = intval($resultarray[$counter]['FOMITEM']);
+            $csls = ($resultarray[$counter]['FOMCSLS']);
             $pkgu = intval($resultarray[$counter]['FOMPKGU']);
             $avg = intval($resultarray[$counter]['AVGQTY']);
             $std = intval($resultarray[$counter]['STDQTY']);
             $count = intval($resultarray[$counter]['COUNTQTY']);
 
-            $data[] = "($whse, $item, $pkgu, $avg, $std, $count)";
+            $data[] = "($whse, $item, '$csls', $pkgu, $avg, $std, $count)";
             $counter += 1;
         }
 

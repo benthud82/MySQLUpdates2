@@ -13,8 +13,8 @@ include '../globalfunctions/custdbfunctions.php';
 
 $rowreturn = 50000;
 $offset = 0;
-include '../globalincludes/nahsi_mysql.php';  //production connection
-$sqldelete = "TRUNCATE TABLE customerscores_shipto_merge";
+include '../connections/conn_custaudit.php';  //conn1
+$sqldelete = "TRUNCATE TABLE custaudit.customerscores_shipto_merge";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -133,7 +133,7 @@ do {
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R
+            custaudit.custreturns R
         WHERE
             R.BILLTONUM = L.BILLTONUM
                 and R.SHIPTONUM = L.SHIPTONUM
@@ -142,7 +142,7 @@ do {
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R
+            custaudit.custreturns R
         WHERE
             R.BILLTONUM = L.BILLTONUM
                 and R.SHIPTONUM = L.SHIPTONUM
@@ -151,7 +151,7 @@ do {
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R
+            custaudit.custreturns R
         WHERE
             R.BILLTONUM = L.BILLTONUM
                 and R.SHIPTONUM = L.SHIPTONUM
@@ -160,7 +160,7 @@ do {
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R
+            custaudit.custreturns R
         WHERE
             R.BILLTONUM = L.BILLTONUM
                 and R.SHIPTONUM = L.SHIPTONUM
@@ -169,7 +169,7 @@ do {
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R
+            custaudit.custreturns R
         WHERE
             R.BILLTONUM = L.BILLTONUM
                 and R.SHIPTONUM = L.SHIPTONUM
@@ -178,7 +178,7 @@ do {
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R
+            custaudit.custreturns R
         WHERE
             R.BILLTONUM = L.BILLTONUM
                 and R.SHIPTONUM = L.SHIPTONUM
@@ -187,7 +187,7 @@ do {
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R
+            custaudit.custreturns R
         WHERE
             R.BILLTONUM = L.BILLTONUM
                 and R.SHIPTONUM = L.SHIPTONUM
@@ -203,7 +203,7 @@ do {
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R
+            custaudit.custreturns R
         WHERE
             R.BILLTONUM = L.BILLTONUM
                 and R.SHIPTONUM = L.SHIPTONUM
@@ -219,7 +219,7 @@ do {
     (SELECT 
             count(ITEMCODE)
         FROM
-            custreturns R
+            custaudit.custreturns R
         WHERE
             R.BILLTONUM = L.BILLTONUM
                 and R.SHIPTONUM = L.SHIPTONUM
@@ -237,7 +237,7 @@ do {
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R
+                    custaudit.custreturns R
                 WHERE
                     R.BILLTONUM = L.BILLTONUM
                         and R.SHIPTONUM = L.SHIPTONUM
@@ -248,7 +248,7 @@ do {
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R
+                custaudit.custreturns R
             WHERE
                 R.BILLTONUM = L.BILLTONUM
                     and R.SHIPTONUM = L.SHIPTONUM
@@ -260,7 +260,7 @@ do {
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R
+                    custaudit.custreturns R
                 WHERE
                     R.BILLTONUM = L.BILLTONUM
                         and R.SHIPTONUM = L.SHIPTONUM
@@ -271,7 +271,7 @@ do {
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R
+                custaudit.custreturns R
             WHERE
                 R.BILLTONUM = L.BILLTONUM
                     and R.SHIPTONUM = L.SHIPTONUM
@@ -283,7 +283,7 @@ do {
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R
+                    custaudit.custreturns R
                 WHERE
                     R.BILLTONUM = L.BILLTONUM
                         and R.SHIPTONUM = L.SHIPTONUM
@@ -294,7 +294,7 @@ do {
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R
+                custaudit.custreturns R
             WHERE
                 R.BILLTONUM = L.BILLTONUM
                     and R.SHIPTONUM = L.SHIPTONUM
@@ -306,7 +306,7 @@ do {
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R
+                    custaudit.custreturns R
                 WHERE
                     R.BILLTONUM = L.BILLTONUM
                         and R.SHIPTONUM = L.SHIPTONUM
@@ -317,7 +317,7 @@ do {
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R
+                custaudit.custreturns R
             WHERE
                 R.BILLTONUM = L.BILLTONUM
                     and R.SHIPTONUM = L.SHIPTONUM
@@ -329,7 +329,7 @@ do {
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R
+                    custaudit.custreturns R
                 WHERE
                     R.BILLTONUM = L.BILLTONUM
                         and R.SHIPTONUM = L.SHIPTONUM
@@ -340,7 +340,7 @@ do {
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R
+                custaudit.custreturns R
             WHERE
                 R.BILLTONUM = L.BILLTONUM
                     and R.SHIPTONUM = L.SHIPTONUM
@@ -352,7 +352,7 @@ do {
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R
+                    custaudit.custreturns R
                 WHERE
                     R.BILLTONUM = L.BILLTONUM
                         and R.SHIPTONUM = L.SHIPTONUM
@@ -363,7 +363,7 @@ do {
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R
+                custaudit.custreturns R
             WHERE
                 R.BILLTONUM = L.BILLTONUM
                     and R.SHIPTONUM = L.SHIPTONUM
@@ -375,7 +375,7 @@ do {
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R
+                    custaudit.custreturns R
                 WHERE
                     R.BILLTONUM = L.BILLTONUM
                         and R.SHIPTONUM = L.SHIPTONUM
@@ -393,7 +393,7 @@ do {
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R
+                custaudit.custreturns R
             WHERE
                 R.BILLTONUM = L.BILLTONUM
                     and R.SHIPTONUM = L.SHIPTONUM
@@ -412,7 +412,7 @@ do {
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R
+                    custaudit.custreturns R
                 WHERE
                     R.BILLTONUM = L.BILLTONUM
                         and R.SHIPTONUM = L.SHIPTONUM
@@ -430,7 +430,7 @@ do {
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R
+                custaudit.custreturns R
             WHERE
                 R.BILLTONUM = L.BILLTONUM
                     and R.SHIPTONUM = L.SHIPTONUM
@@ -449,7 +449,7 @@ do {
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custreturns R
+                    custaudit.custreturns R
                 WHERE
                     R.BILLTONUM = L.BILLTONUM
                         and R.SHIPTONUM = L.SHIPTONUM
@@ -467,7 +467,7 @@ do {
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custreturns R
+                custaudit.custreturns R
             WHERE
                 R.BILLTONUM = L.BILLTONUM
                     and R.SHIPTONUM = L.SHIPTONUM
@@ -482,9 +482,9 @@ do {
                     and RETURNDATE >= $rolling_12_start_1yyddd) / sum(ROLL_12_LINES))
     end) as ADDSCACCPERCR12
 FROM
-    invlinesbyshipto L
+    custaudit.invlinesbyshipto L
         join
-    fillratebyshipto F ON F.BILLTO = L.BILLTONUM
+    custaudit.fillratebyshipto F ON F.BILLTO = L.BILLTONUM
         and F.SHIPTO = L.SHIPTONUM and (CUR_MONTH_SALES >= 750 or ROLL_12_SALES >= 10000)
 GROUP BY L.BILLTONUM , L.SHIPTONUM LIMIT $offset, $rowreturn;");
 
@@ -566,7 +566,7 @@ GROUP BY L.BILLTONUM , L.SHIPTONUM LIMIT $offset, $rowreturn;");
     sum(ORDERS_COMPLETE_QTR_EXCLDS) / sum(TOTAL_ORDERS_QTR) AS QTROSC_EXCLDS,
     sum(ORDERS_COMPLETE_R12_EXCLDS) / sum(TOTAL_ORDERS_R12) AS R12OSC_EXCLDS
 FROM
-    oscbyshipto
+    custaudit.oscbyshipto
 WHERE
     BILLTONUM = $BILLTONUM and SHIPTONUM = $SHIPTONUM");
         $result2->execute();
@@ -614,7 +614,7 @@ WHERE
         //SQL Query for trend
 
         $xcordarray = array();
-        $resulttrend = $conn1->prepare("SELECT * FROM slotting.custscoresbyday_shipto WHERE RECORDDATE BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW() and BILLTONUM = $BILLTONUM and SHIPTONUM = $SHIPTONUM ORDER BY RECORDDATE asc");
+        $resulttrend = $conn1->prepare("SELECT * FROM custaudit.custscoresbyday_shipto WHERE RECORDDATE BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW() and BILLTONUM = $BILLTONUM and SHIPTONUM = $SHIPTONUM ORDER BY RECORDDATE asc");
         $resulttrend->execute();
         $resultarraytrend = $resulttrend->fetchAll(PDO::FETCH_ASSOC);
         $trendarraycount = count($resultarraytrend);
@@ -1302,16 +1302,16 @@ OSCMONTH_EXCLDS,OSCQUARTER_EXCLDS,OSCROLL12_EXCLDS,SLOPEOSCMONTH_EXCLDS,SLOPEOSC
 //    }
 //    $columns3 = "BILLTONUM, SHIPTONUM, SHIPTONAME,RECORDDATE, SCOREMONTH,SCOREQUARTER,SCOREROLL12,SLOPE30DAY,SLOPE90DAY,SLOPE12MON,LINESMONTH,LINESQUARTER,LINESROLL12,SLOPELINES30DAY,SLOPELINES90DAY,SLOPELINES12MON,BOMONTH,BOQUARTER,BOROLL12,SLOPEBO30DAY,SLOPEBO90DAY,SLOPEBO12MON,BEMONTH,BEQUARTER,BEROLL12,SLOPEBE30DAY,SLOPEBE90DAY,SLOPEBE12MON,DMONTH,DQUARTER,DROLL12,SLOPED30DAY,SLOPED90DAY,SLOPED12MON,XDMONTH,XDQUARTER,XDROLL12,SLOPEXD30DAY,SLOPEXD90DAY,SLOPEXD12MON,XEMONTH,XEQUARTER,XEROLL12,SLOPEXE30DAY,SLOPEXE90DAY,SLOPEXE12MON,XSMONTH,XSQUARTER,XSROLL12,SLOPEXS30DAY,SLOPEXS90DAY,SLOPEXS12MON,BEFFRMNT,AFTFRMNT,BEFFRQTR,AFTFRQTR,BEFFRR12,AFTFRR12,SLOPEBEFFRMNT,SLOPEAFTFRMNT,SLOPEBEFFRQTR,SLOPEAFTFRQTR,SLOPEAFTFRR12,SLOPEBEFFRR12,SHIPACCMONTH,SHIPACCQUARTER,SHIPACCROLL12,SLOPESHIPACCMONTH,SLOPESHIPACCQUARTER,SLOPESHIPACCROLL12,DMGACCMONTH,DMGACCQUARTER,DMGACCROLL12,SLOPEDMGACCMONTH,SLOPEDMGACCQUARTER,SLOPEDMGACCROLL12,ADDSCACCMONTH,ADDSCACCQUARTER,ADDSCACCROLL12,SLOPEADDSCACCMONTH,SLOPEADDSCACCQUARTER,SLOPEADDSCACCROLL12,OSCMONTH,OSCQUARTER,OSCROLL12,SLOPEOSCMONTH,SLOPEOSCQUARTER,SLOPEOSCROLL12,SCOREMONTH_EXCLDS,SCOREQUARTER_EXCLDS,SCOREROLL12_EXCLDS,SLOPE30DAY_EXCLDS,SLOPE90DAY_EXCLDS,SLOPE12MON_EXCLDS,BEFFRMNT_EXCLDS,AFTFRMNT_EXCLDS,BEFFRQTR_EXCLDS,AFTFRQTR_EXCLDS,BEFFRR12_EXCLDS,AFTFRR12_EXCLDS,SLOPEBEFFRMNT_EXCLDS,SLOPEAFTFRMNT_EXCLDS,SLOPEBEFFRQTR_EXCLDS,SLOPEAFTFRQTR_EXCLDS,SLOPEAFTFRR12_EXCLDS,SLOPEBEFFRR12_EXCLDS,OSCMONTH_EXCLDS,OSCQUARTER_EXCLDS,OSCROLL12_EXCLDS,SLOPEOSCMONTH_EXCLDS,SLOPEOSCQUARTER_EXCLDS,SLOPEOSCROLL12_EXCLDS,PBFRMNT,PBFRQTR,PBFRR12,SLOPEPBFRMNT,SLOPEPBFRQTR,SLOPEPBFRR12, BILLTONAME,TOTMONTHCOGS,TOTMONTHSALES,TOTQTRCOGS,TOTQTRSALES,TOTR12COGS,TOTR12SALES,CUR_MNT_P_LINES,CUR_QTR_P_LINES,R12_P_LINES";
 
-        $sql = "INSERT IGNORE INTO slotting.customerscores_shipto_merge ($columns) VALUES $values";
+        $sql = "INSERT IGNORE INTO custaudit.customerscores_shipto_merge ($columns) VALUES $values";
         $query = $conn1->prepare($sql);
         $query->execute();
 
-        $sql2 = "INSERT IGNORE INTO slotting.custscoresbyday_shipto ($columns2) VALUES $values2";
+        $sql2 = "INSERT IGNORE INTO custaudit.custscoresbyday_shipto ($columns2) VALUES $values2";
         $query2 = $conn1->prepare($sql2);
         $query2->execute();
 
 
-//    $sql3 = "INSERT IGNORE INTO slotting.scorecard_display_shipto ($columns3) VALUES $values3";
+//    $sql3 = "INSERT IGNORE INTO custaudit.scorecard_display_shipto ($columns3) VALUES $values3";
 //    $query3 = $conn1->prepare($sql3);
 //    $query3->execute();
 
@@ -1320,24 +1320,24 @@ OSCMONTH_EXCLDS,OSCQUARTER_EXCLDS,OSCROLL12_EXCLDS,SLOPEOSCMONTH_EXCLDS,SLOPEOSC
 
     $offset += 50000;
 } while ($offset <= 999999);
-include '../globalincludes/nahsi_mysql.php';  //production connection
-$sqldelete2 = "TRUNCATE TABLE customerscores_shipto";
+
+$sqldelete2 = "TRUNCATE TABLE custaudit.customerscores_shipto";
 $querydelete2 = $conn1->prepare($sqldelete2);
 $querydelete2->execute();
 
 
-$sqlmerge = "INSERT INTO customerscores_shipto () SELECT * FROM customerscores_shipto_merge;";
+$sqlmerge = "INSERT INTO custaudit.customerscores_shipto () SELECT * FROM customerscores_shipto_merge;";
 $querymerge = $conn1->prepare($sqlmerge);
 $querymerge->execute();
 
-$sqldelete4 = "TRUNCATE TABLE scorecard_display_shipto";
+$sqldelete4 = "TRUNCATE TABLE custaudit.scorecard_display_shipto";
 $querydelete4 = $conn1->prepare($sqldelete4);
 $querydelete4->execute();
 
 $maxdate = $conn1->prepare("SELECT 
                                                             MAX(RECORDDATE) as MAXDATE
                                                         FROM
-                                                            slotting.custscoresbyday_shipto");
+                                                            custaudit.custscoresbyday_shipto");
 $maxdate->execute();
 $maxdatearray = $maxdate->fetchAll(pdo::FETCH_ASSOC);
 
@@ -1345,7 +1345,7 @@ $sqldate = $maxdatearray[0]['MAXDATE'];
 
 
 
-$sqlmerge2 = "INSERT INTO scorecard_display_shipto (BILLTONUM,SHIPTONUM,SHIPTONAME, RECORDDATE,SCOREMONTH,SCOREQUARTER,SCOREROLL12,SLOPE30DAY,SLOPE90DAY,SLOPE12MON,LINESMONTH,LINESQUARTER,LINESROLL12,SLOPELINES30DAY,SLOPELINES90DAY,SLOPELINES12MON,BOMONTH,BOQUARTER,BOROLL12,SLOPEBO30DAY,SLOPEBO90DAY,SLOPEBO12MON,BEMONTH,BEQUARTER,BEROLL12,SLOPEBE30DAY,SLOPEBE90DAY,SLOPEBE12MON,DMONTH,DQUARTER,DROLL12,SLOPED30DAY,SLOPED90DAY,SLOPED12MON,XDMONTH,XDQUARTER,XDROLL12,SLOPEXD30DAY,SLOPEXD90DAY,SLOPEXD12MON,XEMONTH,XEQUARTER,XEROLL12,SLOPEXE30DAY,SLOPEXE90DAY,SLOPEXE12MON,XSMONTH,XSQUARTER,XSROLL12,SLOPEXS30DAY,SLOPEXS90DAY,SLOPEXS12MON,BEFFRMNT,AFTFRMNT,BEFFRQTR,AFTFRQTR,BEFFRR12,AFTFRR12,SLOPEBEFFRMNT,SLOPEAFTFRMNT,SLOPEBEFFRQTR,SLOPEAFTFRQTR,SLOPEAFTFRR12,SLOPEBEFFRR12,SHIPACCMONTH,SHIPACCQUARTER,SHIPACCROLL12,SLOPESHIPACCMONTH,SLOPESHIPACCQUARTER,SLOPESHIPACCROLL12,DMGACCMONTH,DMGACCQUARTER,DMGACCROLL12,SLOPEDMGACCMONTH,SLOPEDMGACCQUARTER,SLOPEDMGACCROLL12,ADDSCACCMONTH,ADDSCACCQUARTER,ADDSCACCROLL12,SLOPEADDSCACCMONTH,SLOPEADDSCACCQUARTER,SLOPEADDSCACCROLL12,OSCMONTH,OSCQUARTER,OSCROLL12, SLOPEOSCMONTH, SLOPEOSCQUARTER, SLOPEOSCROLL12, SCOREMONTH_EXCLDS, SCOREQUARTER_EXCLDS, SCOREROLL12_EXCLDS, SLOPE30DAY_EXCLDS, SLOPE90DAY_EXCLDS, SLOPE12MON_EXCLDS, BEFFRMNT_EXCLDS, AFTFRMNT_EXCLDS, BEFFRQTR_EXCLDS, AFTFRQTR_EXCLDS, BEFFRR12_EXCLDS, AFTFRR12_EXCLDS, SLOPEBEFFRMNT_EXCLDS, SLOPEAFTFRMNT_EXCLDS, SLOPEBEFFRQTR_EXCLDS, SLOPEAFTFRQTR_EXCLDS, SLOPEAFTFRR12_EXCLDS, SLOPEBEFFRR12_EXCLDS, OSCMONTH_EXCLDS, OSCQUARTER_EXCLDS, OSCROLL12_EXCLDS, SLOPEOSCMONTH_EXCLDS, SLOPEOSCQUARTER_EXCLDS, SLOPEOSCROLL12_EXCLDS, PBFRMNT,PBFRQTR,  PBFRR12, SLOPEPBFRMNT, SLOPEPBFRQTR, SLOPEPBFRR12, BILLTONAME, TOTMONTHCOGS, TOTMONTHSALES, TOTQTRCOGS, TOTQTRSALES, TOTR12COGS, TOTR12SALES, CUR_MNT_P_LINES, CUR_QTR_P_LINES, R12_P_LINES)
+$sqlmerge2 = "INSERT INTO custaudit.scorecard_display_shipto (BILLTONUM,SHIPTONUM,SHIPTONAME, RECORDDATE,SCOREMONTH,SCOREQUARTER,SCOREROLL12,SLOPE30DAY,SLOPE90DAY,SLOPE12MON,LINESMONTH,LINESQUARTER,LINESROLL12,SLOPELINES30DAY,SLOPELINES90DAY,SLOPELINES12MON,BOMONTH,BOQUARTER,BOROLL12,SLOPEBO30DAY,SLOPEBO90DAY,SLOPEBO12MON,BEMONTH,BEQUARTER,BEROLL12,SLOPEBE30DAY,SLOPEBE90DAY,SLOPEBE12MON,DMONTH,DQUARTER,DROLL12,SLOPED30DAY,SLOPED90DAY,SLOPED12MON,XDMONTH,XDQUARTER,XDROLL12,SLOPEXD30DAY,SLOPEXD90DAY,SLOPEXD12MON,XEMONTH,XEQUARTER,XEROLL12,SLOPEXE30DAY,SLOPEXE90DAY,SLOPEXE12MON,XSMONTH,XSQUARTER,XSROLL12,SLOPEXS30DAY,SLOPEXS90DAY,SLOPEXS12MON,BEFFRMNT,AFTFRMNT,BEFFRQTR,AFTFRQTR,BEFFRR12,AFTFRR12,SLOPEBEFFRMNT,SLOPEAFTFRMNT,SLOPEBEFFRQTR,SLOPEAFTFRQTR,SLOPEAFTFRR12,SLOPEBEFFRR12,SHIPACCMONTH,SHIPACCQUARTER,SHIPACCROLL12,SLOPESHIPACCMONTH,SLOPESHIPACCQUARTER,SLOPESHIPACCROLL12,DMGACCMONTH,DMGACCQUARTER,DMGACCROLL12,SLOPEDMGACCMONTH,SLOPEDMGACCQUARTER,SLOPEDMGACCROLL12,ADDSCACCMONTH,ADDSCACCQUARTER,ADDSCACCROLL12,SLOPEADDSCACCMONTH,SLOPEADDSCACCQUARTER,SLOPEADDSCACCROLL12,OSCMONTH,OSCQUARTER,OSCROLL12, SLOPEOSCMONTH, SLOPEOSCQUARTER, SLOPEOSCROLL12, SCOREMONTH_EXCLDS, SCOREQUARTER_EXCLDS, SCOREROLL12_EXCLDS, SLOPE30DAY_EXCLDS, SLOPE90DAY_EXCLDS, SLOPE12MON_EXCLDS, BEFFRMNT_EXCLDS, AFTFRMNT_EXCLDS, BEFFRQTR_EXCLDS, AFTFRQTR_EXCLDS, BEFFRR12_EXCLDS, AFTFRR12_EXCLDS, SLOPEBEFFRMNT_EXCLDS, SLOPEAFTFRMNT_EXCLDS, SLOPEBEFFRQTR_EXCLDS, SLOPEAFTFRQTR_EXCLDS, SLOPEAFTFRR12_EXCLDS, SLOPEBEFFRR12_EXCLDS, OSCMONTH_EXCLDS, OSCQUARTER_EXCLDS, OSCROLL12_EXCLDS, SLOPEOSCMONTH_EXCLDS, SLOPEOSCQUARTER_EXCLDS, SLOPEOSCROLL12_EXCLDS, PBFRMNT,PBFRQTR,  PBFRR12, SLOPEPBFRMNT, SLOPEPBFRQTR, SLOPEPBFRR12, BILLTONAME, TOTMONTHCOGS, TOTMONTHSALES, TOTQTRCOGS, TOTQTRSALES, TOTR12COGS, TOTR12SALES, CUR_MNT_P_LINES, CUR_QTR_P_LINES, R12_P_LINES)
 
 SELECT 
     SLOPE.*,
@@ -1360,9 +1360,9 @@ SELECT
     CUR_QTR_P_LINES,
     R12_P_LINES
 FROM
-    slotting.customerscores_shipto SCORES
+    custaudit.customerscores_shipto SCORES
         JOIN
-    slotting.custscoresbyday_shipto SLOPE ON SCORES.BILLTONUM = SLOPE.BILLTONUM
+    custaudit.custscoresbyday_shipto SLOPE ON SCORES.BILLTONUM = SLOPE.BILLTONUM
         AND SCORES.SHIPTONUM = SLOPE.SHIPTONUM
 WHERE
     RECORDDATE = '$sqldate'
@@ -1373,7 +1373,7 @@ $querymerge2->execute();
 
 
 //Add average scores to summary table.
-$sqlmerge3 = "INSERT IGNORE INTO scoreavg_shipto
-SELECT RECORDDATE, avg(scoremonth), avg(scorequarter), avg(scoreroll12) FROM slotting.custscoresbyday_shipto WHERE RECORDDATE  >= DATE_ADD(CURDATE(), INTERVAL -5 DAY) GROUP BY RECORDDATE ;";
+$sqlmerge3 = "INSERT IGNORE INTO custaudit.scoreavg_shipto
+SELECT RECORDDATE, avg(scoremonth), avg(scorequarter), avg(scoreroll12) FROM custaudit.custscoresbyday_shipto WHERE RECORDDATE  >= DATE_ADD(CURDATE(), INTERVAL -5 DAY) GROUP BY RECORDDATE ;";
 $querymerge3 = $conn1->prepare($sqlmerge3);
 $querymerge3->execute();

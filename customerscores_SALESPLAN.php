@@ -1,5 +1,6 @@
 
 <?php
+
 date_default_timezone_set('America/New_York');
 set_time_limit(99999);
 ini_set('max_execution_time', 99999);
@@ -16,6 +17,9 @@ $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
 $RECORDDATE = date('Y-m-d');
+$rollmonthdate = date('Y-m-d', strtotime('-30 days'));
+$rollqtrdate = date('Y-m-d', strtotime('-90 days'));
+$rollyeardate = date('Y-m-d', strtotime('-365 days'));
 
 //Find the first day of current month 1yyddd
 $roll_month_start_1yyddd = _rollmonth1yyddd();  //call current month function to find start for for current month for sql
@@ -122,49 +126,49 @@ $result1 = $conn1->prepare("SELECT
     (SELECT 
             count(ITEMCODE)
         FROM
-            custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                 and RETURNDATE >= $roll_month_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) as shippingacc_monthly,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                 and RETURNDATE >= $roll_quarter_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) as shippingacc_quarter,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                 and RETURNDATE >= $rolling_12_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) as shippingacc_rolling12,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('CRID' , 'TDNR')
                 and RETURNDATE >= $roll_month_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) as damages_monthly,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('CRID' , 'TDNR')
                 and RETURNDATE >= $roll_quarter_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) as damages_quarter,
     (SELECT 
             count(ITEMCODE)
         FROM
-            custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('CRID' , 'TDNR')
                 and RETURNDATE >= $rolling_12_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) as damages_rolling12,
     (SELECT 
             count(ITEMCODE)
         FROM
-           custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+           custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('EXPR' , 'SDAT',
                 'TEMP',
@@ -178,7 +182,7 @@ $result1 = $conn1->prepare("SELECT
     (SELECT 
             count(ITEMCODE)
         FROM
-            custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('EXPR' , 'SDAT',
                 'TEMP',
@@ -192,7 +196,7 @@ $result1 = $conn1->prepare("SELECT
     (SELECT 
             count(ITEMCODE)
         FROM
-            custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+            custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
         WHERE
             RETURNCODE in ('EXPR' , 'SDAT',
                 'TEMP',
@@ -208,7 +212,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                         and RETURNDATE >= $roll_month_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) * sum(CUR_MONTH_LINES) = 0
@@ -217,7 +221,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                     and RETURNDATE >= $roll_month_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) / sum(CUR_MONTH_LINES))
@@ -227,7 +231,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                         and RETURNDATE >= $roll_quarter_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) * sum(CUR_QTR_LINES) = 0
@@ -236,7 +240,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                     and RETURNDATE >= $roll_quarter_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) / sum(CUR_QTR_LINES))
@@ -246,7 +250,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                         and RETURNDATE >= $rolling_12_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) * sum(ROLL_12_LINES) = 0
@@ -255,7 +259,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
             WHERE 
                 RETURNCODE in ('WISP' , 'WQSP', 'IBNS')
                     and RETURNDATE >= $rolling_12_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) / sum(ROLL_12_LINES))
@@ -265,7 +269,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('CRID' , 'TDNR')
                         and RETURNDATE >= $roll_month_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) * sum(CUR_MONTH_LINES) = 0
@@ -274,7 +278,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('CRID' , 'TDNR')
                     and RETURNDATE >= $roll_month_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) / sum(CUR_MONTH_LINES))
@@ -284,7 +288,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('CRID' , 'TDNR')
                         and RETURNDATE >= $roll_quarter_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) * sum(CUR_QTR_LINES) = 0
@@ -293,7 +297,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('CRID' , 'TDNR')
                     and RETURNDATE >= $roll_quarter_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) / sum(CUR_QTR_LINES))
@@ -303,7 +307,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
                 WHERE 
                     RETURNCODE in ('CRID' , 'TDNR')
                         and RETURNDATE >= $rolling_12_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) * sum(ROLL_12_LINES) = 0
@@ -312,7 +316,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('CRID' , 'TDNR')
                     and RETURNDATE >= $rolling_12_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) / sum(ROLL_12_LINES))
@@ -322,7 +326,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('EXPR' , 'SDAT',
                         'TEMP',
@@ -338,7 +342,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('EXPR' , 'SDAT',
                     'TEMP',
@@ -355,7 +359,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('EXPR' , 'SDAT',
                         'TEMP',
@@ -371,7 +375,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('EXPR' , 'SDAT',
                     'TEMP',
@@ -388,7 +392,7 @@ $result1 = $conn1->prepare("SELECT
             (SELECT 
                     count(ITEMCODE)
                 FROM
-                    custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                    custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
                 WHERE
                     RETURNCODE in ('EXPR' , 'SDAT',
                         'TEMP',
@@ -404,7 +408,7 @@ $result1 = $conn1->prepare("SELECT
         else 1 - ((SELECT 
                 count(ITEMCODE)
             FROM
-                custaudit.custreturns R JOIN salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
+                custaudit.custreturns R JOIN custaudit.salesplan Q on Q.BILLTO = R.BILLTONUM and Q.SHIPTO = R.SHIPTONUM
             WHERE
                 RETURNCODE in ('EXPR' , 'SDAT',
                     'TEMP',
@@ -415,7 +419,67 @@ $result1 = $conn1->prepare("SELECT
                     'NRSP',
                     'WQTY')
                     and RETURNDATE >= $rolling_12_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) / sum(ROLL_12_LINES))
-    end) as ADDSCACCPERCR12
+    end) as ADDSCACCPERCR12,
+        (SELECT 
+            (COUNT(*) - SUM(LATE)) / COUNT(*)
+        FROM
+            custaudit.delivery_dates Y
+                JOIN
+            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
+                AND Y.SHIPTO = Z.SHIPTO
+        WHERE
+            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollmonthdate'
+        GROUP BY SALESPLAN) AS PERC_ONTIME_MNT,
+                (SELECT 
+            (COUNT(*) - SUM(LATE)) / COUNT(*)
+        FROM
+            custaudit.delivery_dates Y
+                JOIN
+            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
+                AND Y.SHIPTO = Z.SHIPTO
+        WHERE
+            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollqtrdate'
+        GROUP BY SALESPLAN) AS PERC_ONTIME_QTR,
+                (SELECT 
+            (COUNT(*) - SUM(LATE)) / COUNT(*)
+        FROM
+            custaudit.delivery_dates Y
+                JOIN
+            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
+                AND Y.SHIPTO = Z.SHIPTO
+        WHERE
+            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollyeardate'
+        GROUP BY SALESPLAN) AS PERC_ONTIME_R12,
+    (SELECT 
+            AVG(ACTUALDAYS)
+        FROM
+            custaudit.delivery_dates Y
+                JOIN
+            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
+                AND Y.SHIPTO = Z.SHIPTO
+        WHERE
+            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollmonthdate'
+        GROUP BY SALESPLAN) AS AVG_TNT_MNT,
+            (SELECT 
+            AVG(ACTUALDAYS)
+        FROM
+            custaudit.delivery_dates Y
+                JOIN
+            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
+                AND Y.SHIPTO = Z.SHIPTO
+        WHERE
+            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollqtrdate'
+        GROUP BY SALESPLAN) AS AVG_TNT_QTR,
+            (SELECT 
+            AVG(ACTUALDAYS)
+        FROM
+            custaudit.delivery_dates Y
+                JOIN
+            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
+                AND Y.SHIPTO = Z.SHIPTO
+        WHERE
+            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollyeardate'
+        GROUP BY SALESPLAN) AS AVG_TNT_R12
 FROM
     custaudit.invlinesbyshipto L
         LEFT JOIN
@@ -423,7 +487,7 @@ FROM
     custaudit.fillratebyshipto F
 WHERE
     F.BILLTO = L.BILLTONUM
-        and F.SHIPTO = L.SHIPTONUM
+        and F.SHIPTO = L.SHIPTONUM and S.SALESPLAN is NOT NULL 
 GROUP BY S.SALESPLAN;");
 
 $result1->execute();
@@ -488,6 +552,12 @@ foreach ($masterdisplayarray as $key => $value) {
     $SHIPACCPERCR12 = $masterdisplayarray[$key]['SHIPACCPERCR12'];
     $DAMAGEACCPERCR12 = $masterdisplayarray[$key]['DAMAGEACCPERCR12'];
     $ADDSCACCPERCR12 = $masterdisplayarray[$key]['ADDSCACCPERCR12'];
+    $PERC_ONTIME_MNT = $masterdisplayarray[$key]['PERC_ONTIME_MNT'];
+    $PERC_ONTIME_QTR = $masterdisplayarray[$key]['PERC_ONTIME_QTR'];
+    $PERC_ONTIME_R12 = $masterdisplayarray[$key]['PERC_ONTIME_R12'];
+    $AVG_TNT_MNT = $masterdisplayarray[$key]['AVG_TNT_MNT'];
+    $AVG_TNT_QTR = $masterdisplayarray[$key]['AVG_TNT_QTR'];
+    $AVG_TNT_R12 = $masterdisplayarray[$key]['AVG_TNT_R12'];
 
 
 //Order Shipped Complete Data
@@ -497,7 +567,10 @@ foreach ($masterdisplayarray as $key => $value) {
     sum(ORDERS_COMPLETE_R12) / sum(TOTAL_ORDERS_R12) AS R12OSC,
     sum(ORDERS_COMPLETE_MNTH_EXCLDS) / sum(TOTAL_ORDERS_MNTH) AS MNTHOSC_EXCLDS,
     sum(ORDERS_COMPLETE_QTR_EXCLDS) / sum(TOTAL_ORDERS_QTR) AS QTROSC_EXCLDS,
-    sum(ORDERS_COMPLETE_R12_EXCLDS) / sum(TOTAL_ORDERS_R12) AS R12OSC_EXCLDS
+    sum(ORDERS_COMPLETE_R12_EXCLDS) / sum(TOTAL_ORDERS_R12) AS R12OSC_EXCLDS,
+    sum(TOTAL_ORDERS_MNTH) / 4.35 as MNTH_ORDERS_WK,
+    sum(TOTAL_ORDERS_QTR) / 13.04 as QTR_ORDERS_WK,
+    sum(TOTAL_ORDERS_R12) / 52 as R12_ORDERS_WK
 FROM
     custaudit.oscbyshipto C
 JOIN custaudit.salesplan S on BILLTONUM = BILLTO and SHIPTONUM = SHIPTO
@@ -517,15 +590,24 @@ GROUP BY SALESPLAN");
         $masterdisplayarray[$key]['QTROSC_EXCLDS'] = $QTROSC_EXCLDS;
         $R12OSC_EXCLDS = $row['R12OSC_EXCLDS'];
         $masterdisplayarray[$key]['R12OSC_EXCLDS'] = $R12OSC_EXCLDS;
+
+        $MNTH_ORDERS_WK = $row['MNTH_ORDERS_WK'];
+        $masterdisplayarray[$key]['MNTH_ORDERS_WK'] = $MNTH_ORDERS_WK;
+
+        $QTR_ORDERS_WK = $row['QTR_ORDERS_WK'];
+        $masterdisplayarray[$key]['QTR_ORDERS_WK'] = $QTR_ORDERS_WK;
+
+        $R12_ORDERS_WK = $row['R12_ORDERS_WK'];
+        $masterdisplayarray[$key]['R12_ORDERS_WK'] = $R12_ORDERS_WK;
     }
 
 //calculated scores for roll12, qtr, and month
-    $masterdisplayarray[$key]['CUSTSCOREMNT'] = $BEFFRMNT * $AFTFRMNT * $SHIPACCPERCMNT * $DAMAGEACCPERCMNT * $ADDSCACCPERCMNT * $MNTHOSC;
-    $masterdisplayarray[$key]['CUSTSCOREQTR'] = $BEFFRQTR * $AFTFRQTR * $SHIPACCPERCQTR * $DAMAGEACCPERCQTR * $ADDSCACCPERCQTR * $QTROSC;
-    $masterdisplayarray[$key]['CUSTSCORER12'] = $BEFFRR12 * $AFTFRR12 * $SHIPACCPERCR12 * $DAMAGEACCPERCR12 * $ADDSCACCPERCR12 * $R12OSC;
-    $masterdisplayarray[$key]['CUSTSCOREMNT_EXCLDS'] = $BEFFRMNT_EXCLDS * $AFTFRMNT_EXCLDS * $SHIPACCPERCMNT * $DAMAGEACCPERCMNT * $ADDSCACCPERCMNT * $MNTHOSC_EXCLDS;
-    $masterdisplayarray[$key]['CUSTSCOREQTR_EXCLDS'] = $BEFFRQTR_EXCLDS * $AFTFRQTR_EXCLDS * $SHIPACCPERCQTR * $DAMAGEACCPERCQTR * $ADDSCACCPERCQTR * $QTROSC_EXCLDS;
-    $masterdisplayarray[$key]['CUSTSCORER12_EXCLDS'] = $BEFFRR12_EXCLDS * $AFTFRR12_EXCLDS * $SHIPACCPERCR12 * $DAMAGEACCPERCR12 * $ADDSCACCPERCR12 * $R12OSC_EXCLDS;
+    $masterdisplayarray[$key]['CUSTSCOREMNT'] = $BEFFRMNT * $AFTFRMNT * $SHIPACCPERCMNT * $DAMAGEACCPERCMNT * $ADDSCACCPERCMNT * $MNTHOSC * $PERC_ONTIME_MNT;
+    $masterdisplayarray[$key]['CUSTSCOREQTR'] = $BEFFRQTR * $AFTFRQTR * $SHIPACCPERCQTR * $DAMAGEACCPERCQTR * $ADDSCACCPERCQTR * $QTROSC * $PERC_ONTIME_QTR;
+    $masterdisplayarray[$key]['CUSTSCORER12'] = $BEFFRR12 * $AFTFRR12 * $SHIPACCPERCR12 * $DAMAGEACCPERCR12 * $ADDSCACCPERCR12 * $R12OSC * $PERC_ONTIME_R12;
+    $masterdisplayarray[$key]['CUSTSCOREMNT_EXCLDS'] = $BEFFRMNT_EXCLDS * $AFTFRMNT_EXCLDS * $SHIPACCPERCMNT * $DAMAGEACCPERCMNT * $ADDSCACCPERCMNT * $MNTHOSC_EXCLDS * $PERC_ONTIME_MNT;
+    $masterdisplayarray[$key]['CUSTSCOREQTR_EXCLDS'] = $BEFFRQTR_EXCLDS * $AFTFRQTR_EXCLDS * $SHIPACCPERCQTR * $DAMAGEACCPERCQTR * $ADDSCACCPERCQTR * $QTROSC_EXCLDS * $PERC_ONTIME_QTR;
+    $masterdisplayarray[$key]['CUSTSCORER12_EXCLDS'] = $BEFFRR12_EXCLDS * $AFTFRR12_EXCLDS * $SHIPACCPERCR12 * $DAMAGEACCPERCR12 * $ADDSCACCPERCR12 * $R12OSC_EXCLDS * $PERC_ONTIME_R12;
 
     //SQL Query for trend
 
@@ -844,6 +926,44 @@ GROUP BY SALESPLAN");
         }
 
 
+        $moveycordarrayONTIMEMNT = $moveycordarrayONTIMEQTR = $moveycordarrayONTIMER12 = array();
+        foreach ($resultarraytrend as $key2 => $value) {
+            $moveycordarrayONTIMEMNT[] = $resultarraytrend[$key2]['ONTIMEMNT'];
+        }
+        foreach ($resultarraytrend as $key2 => $value) {
+            $moveycordarrayONTIMEQTR[] = $resultarraytrend[$key2]['ONTIMEQTR'];
+        }
+        foreach ($resultarraytrend as $key2 => $value) {
+            $moveycordarrayONTIMER12[] = $resultarraytrend[$key2]['ONTIMER12'];
+        }
+
+
+
+        $moveycordarrayTNTMNT = $moveycordarrayTNTQTR = $moveycordarrayTNTR12 = array();
+        foreach ($resultarraytrend as $key2 => $value) {
+            $moveycordarrayTNTMNT[] = $resultarraytrend[$key2]['TNTMNT'];
+        }
+        foreach ($resultarraytrend as $key2 => $value) {
+            $moveycordarrayTNTQTR[] = $resultarraytrend[$key2]['TNTQTR'];
+        }
+        foreach ($resultarraytrend as $key2 => $value) {
+            $moveycordarrayTNTR12[] = $resultarraytrend[$key2]['TNTR12'];
+        }
+
+
+
+        $moveycordarrayORDMNT = $moveycordarrayORDQTR = $moveycordarrayORDR12 = array();
+        foreach ($resultarraytrend as $key2 => $value) {
+            $moveycordarrayORDMNT[] = $resultarraytrend[$key2]['ORDMNT'];
+        }
+        foreach ($resultarraytrend as $key2 => $value) {
+            $moveycordarrayORDQTR[] = $resultarraytrend[$key2]['ORDQTR'];
+        }
+        foreach ($resultarraytrend as $key2 => $value) {
+            $moveycordarrayORDR12[] = $resultarraytrend[$key2]['ORDR12'];
+        }
+
+
         $linearregressionarray30day = linear_regression($xcordarray, $moveycordarray30day);
         $linearregressionarray90day = linear_regression($xcordarray, $moveycordarray90day);
         $linearregressionarray12mon = linear_regression($xcordarray, $moveycordarray12mon);
@@ -916,11 +1036,22 @@ GROUP BY SALESPLAN");
         $linearregressionarrayOSC90day_exclds = linear_regression($xcordarray, $moveycordarrayOSC90day_exclds);
         $linearregressionarrayOSC12mon_exclds = linear_regression($xcordarray, $moveycordarrayOSC12mon_exclds);
 
-
         $linearregressionarrayPBFRMNT = linear_regression($xcordarray, $moveycordarrayPBFRMNT);
         $linearregressionarrayPBFRQTR = linear_regression($xcordarray, $moveycordarrayPBFRQTR);
         $linearregressionarrayPBFRR12 = linear_regression($xcordarray, $moveycordarrayPBFRR12);
 
+
+        $linearregressionarrayONTIMEMNT = linear_regression($xcordarray, $moveycordarrayONTIMEMNT);
+        $linearregressionarrayONTIMEQTR = linear_regression($xcordarray, $moveycordarrayONTIMEQTR);
+        $linearregressionarrayONTIMER12 = linear_regression($xcordarray, $moveycordarrayONTIMER12);
+
+        $linearregressionarrayTNTMNT = linear_regression($xcordarray, $moveycordarrayTNTMNT);
+        $linearregressionarrayTNTQTR = linear_regression($xcordarray, $moveycordarrayTNTQTR);
+        $linearregressionarrayTNTR12 = linear_regression($xcordarray, $moveycordarrayTNTR12);
+
+        $linearregressionarrayORDMNT = linear_regression($xcordarray, $moveycordarrayORDMNT);
+        $linearregressionarrayORDQTR = linear_regression($xcordarray, $moveycordarrayORDQTR);
+        $linearregressionarrayORDR12 = linear_regression($xcordarray, $moveycordarrayORDR12);
 
         $masterdisplayarray[$key]['slope30day'] = number_format($linearregressionarray30day['m'], 4);
         $masterdisplayarray[$key]['slope90day'] = number_format($linearregressionarray90day['m'], 4);
@@ -997,11 +1128,23 @@ GROUP BY SALESPLAN");
         $masterdisplayarray[$key]['SLOPEPBFRMNT'] = number_format($linearregressionarrayPBFRMNT['m'], 4);
         $masterdisplayarray[$key]['SLOPEPBFRQTR'] = number_format($linearregressionarrayPBFRQTR['m'], 4);
         $masterdisplayarray[$key]['SLOPEPBFRR12'] = number_format($linearregressionarrayPBFRR12['m'], 4);
+
+        $masterdisplayarray[$key]['slopeONTIMEMNT'] = number_format($linearregressionarrayONTIMEMNT['m'], 4);
+        $masterdisplayarray[$key]['slopeONTIMEQTR'] = number_format($linearregressionarrayONTIMEQTR['m'], 4);
+        $masterdisplayarray[$key]['slopeONTIMER12'] = number_format($linearregressionarrayONTIMER12['m'], 4);
+
+        $masterdisplayarray[$key]['slopeTNTMNT'] = number_format($linearregressionarrayTNTMNT['m'], 4);
+        $masterdisplayarray[$key]['slopeTNTQTR'] = number_format($linearregressionarrayTNTQTR['m'], 4);
+        $masterdisplayarray[$key]['slopeTNTR12'] = number_format($linearregressionarrayTNTR12['m'], 4);
+
+        $masterdisplayarray[$key]['slopeORDMNT'] = number_format($linearregressionarrayORDMNT['m'], 4);
+        $masterdisplayarray[$key]['slopeORDQTR'] = number_format($linearregressionarrayORDQTR['m'], 4);
+        $masterdisplayarray[$key]['slopeORDR12'] = number_format($linearregressionarrayORDR12['m'], 4);
     }
 }
 //Need to push to Mysql table`
 //columns for customerscoresbybilltomerge
-$columns = 'SALESPLAN, TOTMONTHLINES, TOTMONTHCOGS, TOTMONTHSALES, TOTQTRLINES, TOTQTRCOGS, TOTQTRSALES, TOTR12LINES, TOTR12COGS, TOTR12SALES, TOTMNTBO, TOTQTRBO, TOTR12BO, TOTMNTBE, TOTQTRBE, TOTR12BE, TOTMNTD, TOTQTRD, TOTR12D, TOTMNTXD, TOTQTRXD, TOTR12XD, TOTMNTXE, TOTQTRXE, TOTR12XE, TOTMNTXS, TOTQTRXS, TOTR12XS, BEFFRMNT, AFTFRMNT, BEFFRQTR, AFTFRQTR, BEFFRR12, AFTFRR12, SHIPACCPERCMNT, SHIPACCPERCQTR, SHIPACCPERCR12, DAMAGEACCPERCMNT, DAMAGEACCPERCQTR, DAMAGEACCPERCR12, ADDSCACCPERCMNT, ADDSCACCPERCQTR, ADDSCACCPERCR12, MNTHOSC, QTROSC, R12OSC, CUSTSCOREMNT, CUSTSCOREQTR, CUSTSCORER12, BEFFRMNT_EXCLDS, AFTFRMNT_EXCLDS, BEFFRQTR_EXCLDS, AFTFRQTR_EXCLDS, BEFFRR12_EXCLDS, AFTFRR12_EXCLDS, MNTHOSC_EXCLDS, QTROSC_EXCLDS, R12OSC_EXCLDS, CUSTSCOREMNT_EXCLDS, CUSTSCOREQTR_EXCLDS, CUSTSCORER12_EXCLDS, CUR_MNT_P_LINES, CUR_QTR_P_LINES, R12_P_LINES, CUR_MNT_P_FR, CUR_QTR_P_FR, R12_P_FR, PBFRMNT, PBFRQTR, PBFRR12';
+$columns = 'SALESPLAN, TOTMONTHLINES, TOTMONTHCOGS, TOTMONTHSALES, TOTQTRLINES, TOTQTRCOGS, TOTQTRSALES, TOTR12LINES, TOTR12COGS, TOTR12SALES, TOTMNTBO, TOTQTRBO, TOTR12BO, TOTMNTBE, TOTQTRBE, TOTR12BE, TOTMNTD, TOTQTRD, TOTR12D, TOTMNTXD, TOTQTRXD, TOTR12XD, TOTMNTXE, TOTQTRXE, TOTR12XE, TOTMNTXS, TOTQTRXS, TOTR12XS, BEFFRMNT, AFTFRMNT, BEFFRQTR, AFTFRQTR, BEFFRR12, AFTFRR12, SHIPACCPERCMNT, SHIPACCPERCQTR, SHIPACCPERCR12, DAMAGEACCPERCMNT, DAMAGEACCPERCQTR, DAMAGEACCPERCR12, ADDSCACCPERCMNT, ADDSCACCPERCQTR, ADDSCACCPERCR12, MNTHOSC, QTROSC, R12OSC, CUSTSCOREMNT, CUSTSCOREQTR, CUSTSCORER12, BEFFRMNT_EXCLDS, AFTFRMNT_EXCLDS, BEFFRQTR_EXCLDS, AFTFRQTR_EXCLDS, BEFFRR12_EXCLDS, AFTFRR12_EXCLDS, MNTHOSC_EXCLDS, QTROSC_EXCLDS, R12OSC_EXCLDS, CUSTSCOREMNT_EXCLDS, CUSTSCOREQTR_EXCLDS, CUSTSCORER12_EXCLDS, CUR_MNT_P_LINES, CUR_QTR_P_LINES, R12_P_LINES, CUR_MNT_P_FR, CUR_QTR_P_FR, R12_P_FR, PBFRMNT, PBFRQTR, PBFRR12, ONTIMEMNT, ONTIMEQTR, ONTIMER12, TNTMNT, TNTQTR, TNTR12, ORDMNT, ORDQTR, ORDR12';
 //columns for custscoresbyday
 $columns2 = 'SALESPLAN, RECORDDATE, SCOREMONTH, SCOREQUARTER, SCOREROLL12, SLOPE30DAY, SLOPE90DAY, SLOPE12MON, LINESMONTH, LINESQUARTER, LINESROLL12, SLOPELINES30DAY, SLOPELINES90DAY, SLOPELINES12MON, BOMONTH, BOQUARTER, BOROLL12, SLOPEBO30DAY, SLOPEBO90DAY, SLOPEBO12MON,
 BEMONTH,BEQUARTER,BEROLL12,SLOPEBE30DAY,SLOPEBE90DAY,SLOPEBE12MON,DMONTH,DQUARTER,DROLL12,SLOPED30DAY,SLOPED90DAY,SLOPED12MON,XDMONTH,XDQUARTER,XDROLL12,SLOPEXD30DAY,SLOPEXD90DAY,SLOPEXD12MON,XEMONTH,XEQUARTER,
@@ -1009,7 +1152,8 @@ XEROLL12,SLOPEXE30DAY,SLOPEXE90DAY,SLOPEXE12MON,XSMONTH,XSQUARTER,XSROLL12,SLOPE
 SLOPEAFTFRR12,SLOPEBEFFRR12,SHIPACCMONTH,SHIPACCQUARTER,SHIPACCROLL12,SLOPESHIPACCMONTH,SLOPESHIPACCQUARTER,SLOPESHIPACCROLL12,DMGACCMONTH,DMGACCQUARTER,DMGACCROLL12,SLOPEDMGACCMONTH,SLOPEDMGACCQUARTER,SLOPEDMGACCROLL12,ADDSCACCMONTH,ADDSCACCQUARTER,ADDSCACCROLL12,SLOPEADDSCACCMONTH,SLOPEADDSCACCQUARTER,
 SLOPEADDSCACCROLL12,OSCMONTH,OSCQUARTER,OSCROLL12,SLOPEOSCMONTH,SLOPEOSCQUARTER,SLOPEOSCROLL12,SCOREMONTH_EXCLDS,SCOREQUARTER_EXCLDS,SCOREROLL12_EXCLDS,SLOPE30DAY_EXCLDS,SLOPE90DAY_EXCLDS,SLOPE12MON_EXCLDS,
 BEFFRMNT_EXCLDS,AFTFRMNT_EXCLDS,BEFFRQTR_EXCLDS,AFTFRQTR_EXCLDS,BEFFRR12_EXCLDS,AFTFRR12_EXCLDS,SLOPEBEFFRMNT_EXCLDS,SLOPEAFTFRMNT_EXCLDS,SLOPEBEFFRQTR_EXCLDS,SLOPEAFTFRQTR_EXCLDS,SLOPEAFTFRR12_EXCLDS,SLOPEBEFFRR12_EXCLDS,
-OSCMONTH_EXCLDS,OSCQUARTER_EXCLDS,OSCROLL12_EXCLDS,SLOPEOSCMONTH_EXCLDS,SLOPEOSCQUARTER_EXCLDS,SLOPEOSCROLL12_EXCLDS,PBFRMNT,PBFRQTR,PBFRR12,SLOPEPBFRMNT,SLOPEPBFRQTR,SLOPEPBFRR12';
+OSCMONTH_EXCLDS,OSCQUARTER_EXCLDS,OSCROLL12_EXCLDS,SLOPEOSCMONTH_EXCLDS,SLOPEOSCQUARTER_EXCLDS,SLOPEOSCROLL12_EXCLDS,PBFRMNT,PBFRQTR,PBFRR12,SLOPEPBFRMNT,SLOPEPBFRQTR,SLOPEPBFRR12,
+ONTIMEMNT, ONTIMEQTR, ONTIMER12, SLOPEONTIMEMNT, SLOPEONTIMEQTR, SLOPEONTIMER12, TNTMNT, TNTQTR, TNTR12, SLOPETNTMNT, SLOPETNTQTR, SLOPETNTR12, ORDMNT, ORDQTR, ORDR12, SLOPEORDMNT, SLOPEORDQTR, SLOPEORDR12';
 
 $maxrange = 999;
 $counter = 0;
@@ -1022,7 +1166,7 @@ do {
     $data = array();
     $values = array();
     $data2 = array();
-    $values2= array();
+    $values2 = array();
     while ($counter <= $maxrange) {
         $SALESPLAN = $masterdisplayarray[$counter]['SALESPLAN'];
         $TOTMONTHLINES = intval($masterdisplayarray[$counter]['TOTMONTHLINES']);
@@ -1151,13 +1295,30 @@ do {
         $slopeOSC30day_exclds = $masterdisplayarray[$counter]['slopeOSC30day_exclds'];
         $slopeOSC90day_exclds = $masterdisplayarray[$counter]['slopeOSC90day_exclds'];
         $slopeOSC12mon_exclds = $masterdisplayarray[$counter]['slopeOSC12mon_exclds'];
+        $PERC_ONTIME_MNT = $masterdisplayarray[$counter]['PERC_ONTIME_MNT'];
+        $PERC_ONTIME_QTR = $masterdisplayarray[$counter]['PERC_ONTIME_QTR'];
+        $PERC_ONTIME_R12 = $masterdisplayarray[$counter]['PERC_ONTIME_R12'];
+        $AVG_TNT_MNT = $masterdisplayarray[$counter]['AVG_TNT_MNT'];
+        $AVG_TNT_QTR = $masterdisplayarray[$counter]['AVG_TNT_QTR'];
+        $AVG_TNT_R12 = $masterdisplayarray[$counter]['AVG_TNT_R12'];
+        $MNTH_ORDERS_WK = $masterdisplayarray[$counter]['MNTH_ORDERS_WK'];
+        $QTR_ORDERS_WK = $masterdisplayarray[$counter]['QTR_ORDERS_WK'];
+        $R12_ORDERS_WK = $masterdisplayarray[$counter]['R12_ORDERS_WK'];
+        $slopeONTIMEMNT = $masterdisplayarray[$counter]['slopeONTIMEMNT'];
+        $slopeONTIMEQTR = $masterdisplayarray[$counter]['slopeONTIMEQTR'];
+        $slopeONTIMER12 = $masterdisplayarray[$counter]['slopeONTIMER12'];
+        $slopeTNTMNT = $masterdisplayarray[$counter]['slopeTNTMNT'];
+        $slopeTNTQTR = $masterdisplayarray[$counter]['slopeTNTQTR'];
+        $slopeTNTR12 = $masterdisplayarray[$counter]['slopeTNTR12'];
+        $slopeORDMNT = $masterdisplayarray[$counter]['slopeORDMNT'];
+        $slopeORDQTR = $masterdisplayarray[$counter]['slopeORDQTR'];
+        $slopeORDR12 = $masterdisplayarray[$counter]['slopeORDR12'];
+
+
 
         //data for customerscoresbybilltomerge
-        $data[] = "('$SALESPLAN',$TOTMONTHLINES,'$TOTMONTHCOGS','$TOTMONTHSALES',$TOTQTRLINES ,'$TOTQTRCOGS','$TOTQTRSALES',$TOTR12LINES,'$TOTR12COGS','$TOTR12SALES',$TOTMNTBO,$TOTQTRBO,$TOTR12BO,$TOTMNTBE,$TOTQTRBE,$TOTR12BE,$TOTMNTD,$TOTQTRD,$TOTR12D,$TOTMNTXD,$TOTQTRXD,$TOTR12XD,$TOTMNTXE,$TOTQTRXE,$TOTR12XE,$TOTMNTXS,$TOTQTRXS,$TOTR12XS,'$BEFFRMNT','$AFTFRMNT','$BEFFRQTR','$AFTFRQTR','$BEFFRR12','$AFTFRR12','$SHIPACCPERCMNT','$SHIPACCPERCQTR','$SHIPACCPERCR12','$DAMAGEACCPERCMNT','$DAMAGEACCPERCQTR','$DAMAGEACCPERCR12','$ADDSCACCPERCMNT','$ADDSCACCPERCQTR','$ADDSCACCPERCR12','$MNTHOSC','$QTROSC','$R12OSC','$CUSTSCOREMNT','$CUSTSCOREQTR','$CUSTSCORER12','$BEFFRMNT_EXCLDS','$AFTFRMNT_EXCLDS','$BEFFRQTR_EXCLDS','$AFTFRQTR_EXCLDS','$BEFFRR12_EXCLDS','$AFTFRR12_EXCLDS','$MNTHOSC_EXCLDS','$QTROSC_EXCLDS','$R12OSC_EXCLDS','$CUSTSCOREMNT_EXCLDS','$CUSTSCOREQTR_EXCLDS','$CUSTSCORER12_EXCLDS',$CUR_MNT_P_LINES,$CUR_QTR_P_LINES,$R12_P_LINES,$CUR_MNT_P_FR,$CUR_QTR_P_FR,$R12_P_FR,'$PBFRMNT','$PBFRQTR','$PBFRR12')";
-
-
-
-
+        $data[] = "('$SALESPLAN',$TOTMONTHLINES,'$TOTMONTHCOGS','$TOTMONTHSALES',$TOTQTRLINES ,'$TOTQTRCOGS','$TOTQTRSALES',$TOTR12LINES,'$TOTR12COGS','$TOTR12SALES',$TOTMNTBO,$TOTQTRBO,$TOTR12BO,$TOTMNTBE,$TOTQTRBE,$TOTR12BE,$TOTMNTD,$TOTQTRD,$TOTR12D,$TOTMNTXD,$TOTQTRXD,$TOTR12XD,$TOTMNTXE,$TOTQTRXE,$TOTR12XE,$TOTMNTXS,$TOTQTRXS,$TOTR12XS,'$BEFFRMNT','$AFTFRMNT','$BEFFRQTR','$AFTFRQTR','$BEFFRR12','$AFTFRR12','$SHIPACCPERCMNT','$SHIPACCPERCQTR','$SHIPACCPERCR12','$DAMAGEACCPERCMNT','$DAMAGEACCPERCQTR','$DAMAGEACCPERCR12','$ADDSCACCPERCMNT','$ADDSCACCPERCQTR','$ADDSCACCPERCR12','$MNTHOSC','$QTROSC','$R12OSC','$CUSTSCOREMNT','$CUSTSCOREQTR','$CUSTSCORER12','$BEFFRMNT_EXCLDS','$AFTFRMNT_EXCLDS','$BEFFRQTR_EXCLDS','$AFTFRQTR_EXCLDS','$BEFFRR12_EXCLDS','$AFTFRR12_EXCLDS','$MNTHOSC_EXCLDS','$QTROSC_EXCLDS','$R12OSC_EXCLDS','$CUSTSCOREMNT_EXCLDS','$CUSTSCOREQTR_EXCLDS','$CUSTSCORER12_EXCLDS',$CUR_MNT_P_LINES,$CUR_QTR_P_LINES,$R12_P_LINES,$CUR_MNT_P_FR,$CUR_QTR_P_FR,$R12_P_FR,'$PBFRMNT','$PBFRQTR','$PBFRR12', "
+                . "'$PERC_ONTIME_MNT','$PERC_ONTIME_QTR', '$PERC_ONTIME_R12', '$AVG_TNT_MNT', '$AVG_TNT_QTR', '$AVG_TNT_R12', '$MNTH_ORDERS_WK', '$QTR_ORDERS_WK', '$R12_ORDERS_WK')";
 
 
 
@@ -1174,9 +1335,12 @@ do {
    '$CUSTSCOREQTR_EXCLDS','$CUSTSCORER12_EXCLDS','$slope30day_exclds','$slope90day_exclds','$slope12mon_exclds','$BEFFRMNT_EXCLDS','$AFTFRMNT_EXCLDS','$BEFFRQTR_EXCLDS','$AFTFRQTR_EXCLDS',
     '$BEFFRR12_EXCLDS','$AFTFRR12_EXCLDS','$slopeBFFR30day_exclds','$slopeAFTFR30day_exclds','$slopeBFFR90day_exclds','$slopeAFTFR90day_exclds','$slopeBFFR12mon_exclds','$slopeAFTFR12mon_exclds',
    '$MNTHOSC_EXCLDS','$QTROSC_EXCLDS','$R12OSC_EXCLDS','$slopeOSC30day_exclds','$slopeOSC90day_exclds','$slopeOSC12mon_exclds','$PBFRMNT',
-    '$PBFRQTR','$PBFRR12','$SLOPEPBFRMNT','$SLOPEPBFRQTR','$SLOPEPBFRR12')";
+    '$PBFRQTR','$PBFRR12','$SLOPEPBFRMNT','$SLOPEPBFRQTR','$SLOPEPBFRR12',
+     '$PERC_ONTIME_MNT','$PERC_ONTIME_QTR', '$PERC_ONTIME_R12', '$slopeONTIMEMNT', '$slopeONTIMEQTR', '$slopeONTIMER12', 
+     '$AVG_TNT_MNT', '$AVG_TNT_QTR', '$AVG_TNT_R12', '$slopeTNTMNT', '$slopeTNTQTR', '$slopeTNTR12',
+    '$MNTH_ORDERS_WK', '$QTR_ORDERS_WK', '$R12_ORDERS_WK' , '$slopeORDMNT', '$slopeORDQTR', '$slopeORDR12')";
 
-        $counter +=1;
+        $counter += 1;
     }
 
 
@@ -1184,21 +1348,21 @@ do {
     if (empty($values)) {
         break;
     }
-    
+
     $values2 = implode(',', $data2);
     if (empty($values2)) {
         break;
     }
-    
-    
+
+
     $sql = "INSERT IGNORE INTO custaudit.customerscores_salesplan_merge ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
-    
+
     $sql2 = "INSERT IGNORE INTO custaudit.custscoresbyday_salesplan ($columns2) VALUES $values2";
     $query2 = $conn1->prepare($sql2);
     $query2->execute();
-    $maxrange +=1000;
+    $maxrange += 1000;
 } while ($counter <= $rowcount);
 
 
@@ -1215,7 +1379,11 @@ $sqldelete4 = "TRUNCATE TABLE custaudit.scorecard_display_salesplan";
 $querydelete4 = $conn1->prepare($sqldelete4);
 $querydelete4->execute();
 
-$sqlmerge2 = "INSERT INTO custaudit.scorecard_display_salesplan (SALESPLAN,RECORDDATE,SCOREMONTH,SCOREQUARTER,SCOREROLL12,SLOPE30DAY,SLOPE90DAY,SLOPE12MON,LINESMONTH,LINESQUARTER,LINESROLL12,SLOPELINES30DAY,SLOPELINES90DAY,SLOPELINES12MON,BOMONTH,BOQUARTER,BOROLL12,SLOPEBO30DAY,SLOPEBO90DAY,SLOPEBO12MON,BEMONTH,BEQUARTER,BEROLL12,SLOPEBE30DAY,SLOPEBE90DAY,SLOPEBE12MON,DMONTH,DQUARTER,DROLL12,SLOPED30DAY,SLOPED90DAY,SLOPED12MON,XDMONTH,XDQUARTER,XDROLL12,SLOPEXD30DAY,SLOPEXD90DAY,SLOPEXD12MON,XEMONTH,XEQUARTER,XEROLL12,SLOPEXE30DAY,SLOPEXE90DAY,SLOPEXE12MON,XSMONTH,XSQUARTER,XSROLL12,SLOPEXS30DAY,SLOPEXS90DAY,SLOPEXS12MON,BEFFRMNT,AFTFRMNT,BEFFRQTR,AFTFRQTR,BEFFRR12,AFTFRR12,SLOPEBEFFRMNT,SLOPEAFTFRMNT,SLOPEBEFFRQTR,SLOPEAFTFRQTR,SLOPEAFTFRR12,SLOPEBEFFRR12,SHIPACCMONTH,SHIPACCQUARTER,SHIPACCROLL12,SLOPESHIPACCMONTH,SLOPESHIPACCQUARTER,SLOPESHIPACCROLL12,DMGACCMONTH,DMGACCQUARTER,DMGACCROLL12,SLOPEDMGACCMONTH,SLOPEDMGACCQUARTER,SLOPEDMGACCROLL12,ADDSCACCMONTH,ADDSCACCQUARTER,ADDSCACCROLL12,SLOPEADDSCACCMONTH,SLOPEADDSCACCQUARTER,SLOPEADDSCACCROLL12,OSCMONTH,OSCQUARTER,OSCROLL12, SLOPEOSCMONTH, SLOPEOSCQUARTER, SLOPEOSCROLL12, SCOREMONTH_EXCLDS, SCOREQUARTER_EXCLDS, SCOREROLL12_EXCLDS, SLOPE30DAY_EXCLDS, SLOPE90DAY_EXCLDS, SLOPE12MON_EXCLDS, BEFFRMNT_EXCLDS, AFTFRMNT_EXCLDS, BEFFRQTR_EXCLDS, AFTFRQTR_EXCLDS, BEFFRR12_EXCLDS, AFTFRR12_EXCLDS, SLOPEBEFFRMNT_EXCLDS, SLOPEAFTFRMNT_EXCLDS, SLOPEBEFFRQTR_EXCLDS, SLOPEAFTFRQTR_EXCLDS, SLOPEAFTFRR12_EXCLDS, SLOPEBEFFRR12_EXCLDS, OSCMONTH_EXCLDS, OSCQUARTER_EXCLDS, OSCROLL12_EXCLDS, SLOPEOSCMONTH_EXCLDS, SLOPEOSCQUARTER_EXCLDS, SLOPEOSCROLL12_EXCLDS, PBFRMNT,PBFRQTR,  PBFRR12, SLOPEPBFRMNT, SLOPEPBFRQTR, SLOPEPBFRR12, TOTMONTHCOGS, TOTMONTHSALES, TOTQTRCOGS, TOTQTRSALES, TOTR12COGS, TOTR12SALES, CUR_MNT_P_LINES, CUR_QTR_P_LINES, R12_P_LINES)
+$sqlmerge2 = "INSERT INTO custaudit.scorecard_display_salesplan (SALESPLAN,RECORDDATE,SCOREMONTH,SCOREQUARTER,SCOREROLL12,SLOPE30DAY,SLOPE90DAY,SLOPE12MON,LINESMONTH,LINESQUARTER,LINESROLL12,SLOPELINES30DAY,SLOPELINES90DAY,SLOPELINES12MON,BOMONTH,BOQUARTER,BOROLL12,SLOPEBO30DAY,SLOPEBO90DAY,SLOPEBO12MON,BEMONTH,BEQUARTER,BEROLL12,SLOPEBE30DAY,SLOPEBE90DAY,SLOPEBE12MON,DMONTH,DQUARTER,DROLL12,SLOPED30DAY,SLOPED90DAY,SLOPED12MON,XDMONTH,XDQUARTER,XDROLL12,SLOPEXD30DAY,SLOPEXD90DAY,SLOPEXD12MON,XEMONTH,XEQUARTER,XEROLL12,SLOPEXE30DAY,SLOPEXE90DAY,SLOPEXE12MON,XSMONTH,XSQUARTER,XSROLL12,SLOPEXS30DAY,SLOPEXS90DAY,SLOPEXS12MON,BEFFRMNT,AFTFRMNT,BEFFRQTR,AFTFRQTR,BEFFRR12,AFTFRR12,SLOPEBEFFRMNT,SLOPEAFTFRMNT,SLOPEBEFFRQTR,SLOPEAFTFRQTR,SLOPEAFTFRR12,SLOPEBEFFRR12,SHIPACCMONTH,SHIPACCQUARTER,SHIPACCROLL12,SLOPESHIPACCMONTH,SLOPESHIPACCQUARTER,SLOPESHIPACCROLL12,DMGACCMONTH,DMGACCQUARTER,DMGACCROLL12,SLOPEDMGACCMONTH,SLOPEDMGACCQUARTER,SLOPEDMGACCROLL12,ADDSCACCMONTH,ADDSCACCQUARTER,ADDSCACCROLL12,SLOPEADDSCACCMONTH,SLOPEADDSCACCQUARTER,SLOPEADDSCACCROLL12,OSCMONTH,OSCQUARTER,OSCROLL12, SLOPEOSCMONTH, SLOPEOSCQUARTER, SLOPEOSCROLL12, SCOREMONTH_EXCLDS, SCOREQUARTER_EXCLDS, SCOREROLL12_EXCLDS, SLOPE30DAY_EXCLDS, SLOPE90DAY_EXCLDS, SLOPE12MON_EXCLDS, BEFFRMNT_EXCLDS, AFTFRMNT_EXCLDS, BEFFRQTR_EXCLDS, AFTFRQTR_EXCLDS, BEFFRR12_EXCLDS, AFTFRR12_EXCLDS, SLOPEBEFFRMNT_EXCLDS, SLOPEAFTFRMNT_EXCLDS, SLOPEBEFFRQTR_EXCLDS, SLOPEAFTFRQTR_EXCLDS, SLOPEAFTFRR12_EXCLDS, SLOPEBEFFRR12_EXCLDS, OSCMONTH_EXCLDS, OSCQUARTER_EXCLDS, OSCROLL12_EXCLDS, SLOPEOSCMONTH_EXCLDS, SLOPEOSCQUARTER_EXCLDS, SLOPEOSCROLL12_EXCLDS, PBFRMNT,PBFRQTR,  PBFRR12, SLOPEPBFRMNT, SLOPEPBFRQTR, SLOPEPBFRR12, 
+  ONTIMEMNT, ONTIMEQTR, ONTIMER12, SLOPEONTIMEMNT, SLOPEONTIMEQTR, SLOPEONTIMER12, 
+  TNTMNT, TNTQTR, TNTR12, SLOPETNTMNT, SLOPETNTQTR, SLOPETNTR12,
+  ORDMNT, ORDQTR, ORDR12, SLOPEORDMNT, SLOPEORDQTR, SLOPEORDR12, 
+  TOTMONTHCOGS, TOTMONTHSALES, TOTQTRCOGS, TOTQTRSALES, TOTR12COGS, TOTR12SALES, CUR_MNT_P_LINES, CUR_QTR_P_LINES, R12_P_LINES)
 
 SELECT 
     SLOPE . *, TOTMONTHCOGS, TOTMONTHSALES, TOTQTRCOGS, TOTQTRSALES, TOTR12COGS, TOTR12SALES, CUR_MNT_P_LINES, CUR_QTR_P_LINES, R12_P_LINES 

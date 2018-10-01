@@ -26,7 +26,7 @@ $yesterdaytime = ('16:59:59');
 $printcutoff = date('Y-m-d H:i:s', strtotime("$yesterday $yesterdaytime"));
 
 
-$deletdate = date('Y-m-d', strtotime("-15 days"));
+$deletdate = date('Y-m-d', strtotime("-180 days"));
 
 
 

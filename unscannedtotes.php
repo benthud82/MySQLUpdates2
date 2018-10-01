@@ -55,6 +55,7 @@ foreach ($whsearray as $whsesel) {
                                                                                 WHERE TRIM(substring(NVFLAT,3,2)) = '0$whsesel' 
                                                                                               and TRIM(substr(NVFLAT,137,10)) <> ' ' 
                                                                                               and TRIM(substr(NVFLAT,7,5)) * 1 <> 0
+                                                                                              and TRIM(substr(NVFLAT,46,10)) not in ('00002','00003','00006','00007','00009')
                                                                                               and TRIM(substr(NVFLAT,137,10)) >= CURDATE() - 5 DAYS ");
     $cartstartdata->execute();
     $scannedtote_array = $cartstartdata->fetchAll(pdo::FETCH_ASSOC);
@@ -136,6 +137,7 @@ foreach ($whsearray as $whsesel) {
                                                                                                and TRIM(substr(A.NVFLAT,111,10)) <> ' ' 
                                                                                                and TRIM(substr(NVFLAT,7,5)) * 1 <> 0
                                                                                                and TRIM(substr(A.NVFLAT,12,6)) = 'PCKSTR'
+                                                                                                and TRIM(substr(NVFLAT,46,10)) not in ('00002','00003','00006','00007','00009')
                                                                                                and TRIM(substr(A.NVFLAT,111,10)) >= CURDATE() - 5 Days");
     $cartstartdata->execute();
     $cartstarttime_array = $cartstartdata->fetchAll(pdo::FETCH_ASSOC);

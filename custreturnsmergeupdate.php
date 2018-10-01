@@ -54,7 +54,7 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 
 
-$columns = 'BILLTONUM, BILLTONAME, SHIPTONUM, SHIPTONAME, WCSNUM, WONUM, SHIPDATEJ, JDENUM, RINUM, RETURNCODE, ITEMCODE, RETURNDATE, SHIPZONE, TRACERNUM, BOXNUM, BOXSIZE, WHSE, DIVISION, ORD_RETURNDATE';
+$columns = 'BILLTONUM, BILLTONAME, SHIPTONUM, SHIPTONAME, WCSNUM, WONUM, SHIPDATEJ, JDENUM, RINUM, RETURNCODE, ITEMCODE, RETURNDATE, SHIPZONE, TRACERNUM, BOXNUM, BOXSIZE, WHSE, DIVISION, ORD_RETURNDATE, LPNUM';
 
 
 
@@ -74,7 +74,7 @@ for ($xstart = $startdatej; $xstart <= $enddatej; $xstart++) {
     foreach ($custreturnsarray as $key => $value) {
 
         $id = $custreturnsarray[$key][0];  //id to search for, WCS-WO
-        $wpspush = $aseriesconn->prepare("SELECT DISTINCT PBDOC AS MAINKEY, IM0018.BILL_TO, IM0018.BILL_TO_NAME, IM0018.CUSTOMER, IM0018.CUST_NAME, PBSHJD, PBDOCO, PBSHPC, PBTRC#, PBBOX#, PBBXSZ, PBWHSE, case when SLS_DVN2 = 'DSL' then 'Dental' when SLS_DVN2 = 'MDL' then 'Medical' when SLS_DVN2 = 'MPH' then 'Medical' when SLS_DVN2 = 'INS' then 'Medical' when SLS_DVN2 = '34B' then 'Medical' when SLS_DVN2 = 'MTX' then 'Medical' else '' end as DIVISION FROM A.HSIPCORDTA.NOTWPS NOTWPS, A.HSIPCORDTA.IM0018 IM0018 WHERE IM0018.CUSTOMER = PBSHAN and PBDOC = $id and IM0018.BILL_TO_NAME <> 'Henry Schein France S A'");
+        $wpspush = $aseriesconn->prepare("SELECT DISTINCT PBDOC AS MAINKEY, IM0018.BILL_TO, IM0018.BILL_TO_NAME, IM0018.CUSTOMER, IM0018.CUST_NAME, PBSHJD, PBDOCO, PBSHPC, PBTRC#, PBBOX#, PBBXSZ, PBWHSE, case when SLS_DVN2 = 'DSL' then 'Dental' when SLS_DVN2 = 'MDL' then 'Medical' when SLS_DVN2 = 'MPH' then 'Medical' when SLS_DVN2 = 'INS' then 'Medical' when SLS_DVN2 = '34B' then 'Medical' when SLS_DVN2 = 'MTX' then 'Medical' else '' end as DIVISION, PBLP9D FROM A.HSIPCORDTA.NOTWPS NOTWPS, A.HSIPCORDTA.IM0018 IM0018 WHERE IM0018.CUSTOMER = PBSHAN and PBDOC = $id and IM0018.BILL_TO_NAME <> 'Henry Schein France S A'");
         $wpspush->execute();
         $wpspusharray = $wpspush->fetchAll(pdo::FETCH_NUM);
         $keyvalindex = _searchForKey($id, $wpspusharray, 0);  //call function to find matching array in returns info
@@ -90,6 +90,7 @@ for ($xstart = $startdatej; $xstart <= $enddatej; $xstart++) {
             $custreturnsarray[$key][28] = $wpspusharray[$keyvalindex][10];  //if match is found, push the PBDOCO to end of array
             $custreturnsarray[$key][29] = $wpspusharray[$keyvalindex][11];  //if match is found, push the PBDOCO to end of array
             $custreturnsarray[$key][30] = $wpspusharray[$keyvalindex][12];  //if match is found, push the DIVISION to end of array
+            $custreturnsarray[$key][31] = $wpspusharray[$keyvalindex][13];  //if match is found, push the LP to end of array
             $custreturnsarray[$key] = array_values($custreturnsarray[$key]);
 
             $RINUM = intval($custreturnsarray[$key][1]);
@@ -111,10 +112,11 @@ for ($xstart = $startdatej; $xstart <= $enddatej; $xstart++) {
             $BOXSIZE = $custreturnsarray[$key][15];
             $WHSE = intval($custreturnsarray[$key][16]);
             $DIVISION = $custreturnsarray[$key][17];
+            $LPNUM = $custreturnsarray[$key][18];
             $ORD_RETURNDATE = date('Y-m-d', strtotime(_1yydddtogregdate($RETURNDATE)));
 
 
-            $data[] = "($BILLTONUM, '$BILLTONAME', $SHIPTONUM, '$SHIPTONAME', $WCSNUM, $WONUM, $SHIPDATEJ,$JDENUM, $RINUM, '$RETURNCODE', $ITEMCODE, $RETURNDATE, '$SHIPZONE', '$TRACERNUM', $BOXNUM, '$BOXSIZE', $WHSE, '$DIVISION', '$ORD_RETURNDATE')";
+            $data[] = "($BILLTONUM, '$BILLTONAME', $SHIPTONUM, '$SHIPTONAME', $WCSNUM, $WONUM, $SHIPDATEJ,$JDENUM, $RINUM, '$RETURNCODE', $ITEMCODE, $RETURNDATE, '$SHIPZONE', '$TRACERNUM', $BOXNUM, '$BOXSIZE', $WHSE, '$DIVISION', '$ORD_RETURNDATE', $LPNUM)";
 
 
 
@@ -139,8 +141,8 @@ for ($xstart = $startdatej; $xstart <= $enddatej; $xstart++) {
 }
 
 
-$sqlmerge = "INSERT INTO custaudit.custreturns(BILLTONUM, BILLTONAME, SHIPTONUM, SHIPTONAME, WCSNUM, WONUM, SHIPDATEJ, JDENUM, RINUM, RETURNCODE, ITEMCODE, RETURNDATE, SHIPZONE, TRACERNUM, BOXNUM, BOXSIZE, WHSE, DIVISION, ORD_RETURNDATE)
-SELECT custreturnsmerge.BILLTONUM, custreturnsmerge.BILLTONAME, custreturnsmerge.SHIPTONUM, custreturnsmerge.SHIPTONAME, custreturnsmerge.WCSNUM, custreturnsmerge.WONUM, custreturnsmerge.SHIPDATEJ, custreturnsmerge.JDENUM, custreturnsmerge.RINUM, custreturnsmerge.RETURNCODE, custreturnsmerge.ITEMCODE, custreturnsmerge.RETURNDATE, custreturnsmerge.SHIPZONE, custreturnsmerge.TRACERNUM, custreturnsmerge.BOXNUM, custreturnsmerge.BOXSIZE, custreturnsmerge.WHSE, custreturnsmerge.DIVISION, custreturnsmerge.ORD_RETURNDATE FROM custaudit.custreturnsmerge
-ON DUPLICATE KEY UPDATE custreturns.BILLTONUM = custreturnsmerge.BILLTONUM, custreturns.BILLTONAME = custreturnsmerge.BILLTONAME, custreturns.SHIPTONUM = custreturnsmerge.SHIPTONUM, custreturns.SHIPTONAME = custreturnsmerge.SHIPTONAME, custreturns.WCSNUM = custreturnsmerge.WCSNUM, custreturns.WONUM = custreturnsmerge.WONUM, custreturns.SHIPDATEJ = custreturnsmerge.SHIPDATEJ, custreturns.JDENUM = custreturnsmerge.JDENUM, custreturns.RINUM = custreturnsmerge.RINUM, custreturns.RETURNCODE = custreturnsmerge.RETURNCODE, custreturns.ITEMCODE = custreturnsmerge.ITEMCODE, custreturns.RETURNDATE = custreturnsmerge.RETURNDATE, custreturns.SHIPZONE = custreturnsmerge.SHIPZONE, custreturns.TRACERNUM = custreturnsmerge.TRACERNUM, custreturns.BOXNUM = custreturnsmerge.BOXNUM, custreturns.BOXSIZE = custreturnsmerge.BOXSIZE, custreturns.WHSE = custreturnsmerge.WHSE, custreturns.DIVISION = custreturnsmerge.DIVISION, custreturns.ORD_RETURNDATE = custreturnsmerge.ORD_RETURNDATE;";
+$sqlmerge = "INSERT INTO custaudit.custreturns(BILLTONUM, BILLTONAME, SHIPTONUM, SHIPTONAME, WCSNUM, WONUM, SHIPDATEJ, JDENUM, RINUM, RETURNCODE, ITEMCODE, RETURNDATE, SHIPZONE, TRACERNUM, BOXNUM, BOXSIZE, WHSE, DIVISION, ORD_RETURNDATE, LPNUM)
+SELECT custreturnsmerge.BILLTONUM, custreturnsmerge.BILLTONAME, custreturnsmerge.SHIPTONUM, custreturnsmerge.SHIPTONAME, custreturnsmerge.WCSNUM, custreturnsmerge.WONUM, custreturnsmerge.SHIPDATEJ, custreturnsmerge.JDENUM, custreturnsmerge.RINUM, custreturnsmerge.RETURNCODE, custreturnsmerge.ITEMCODE, custreturnsmerge.RETURNDATE, custreturnsmerge.SHIPZONE, custreturnsmerge.TRACERNUM, custreturnsmerge.BOXNUM, custreturnsmerge.BOXSIZE, custreturnsmerge.WHSE, custreturnsmerge.DIVISION, custreturnsmerge.ORD_RETURNDATE, custreturnsmerge.LPNUM FROM custaudit.custreturnsmerge
+ON DUPLICATE KEY UPDATE custreturns.BILLTONUM = custreturnsmerge.BILLTONUM, custreturns.BILLTONAME = custreturnsmerge.BILLTONAME, custreturns.SHIPTONUM = custreturnsmerge.SHIPTONUM, custreturns.SHIPTONAME = custreturnsmerge.SHIPTONAME, custreturns.WCSNUM = custreturnsmerge.WCSNUM, custreturns.WONUM = custreturnsmerge.WONUM, custreturns.SHIPDATEJ = custreturnsmerge.SHIPDATEJ, custreturns.JDENUM = custreturnsmerge.JDENUM, custreturns.RINUM = custreturnsmerge.RINUM, custreturns.RETURNCODE = custreturnsmerge.RETURNCODE, custreturns.ITEMCODE = custreturnsmerge.ITEMCODE, custreturns.RETURNDATE = custreturnsmerge.RETURNDATE, custreturns.SHIPZONE = custreturnsmerge.SHIPZONE, custreturns.TRACERNUM = custreturnsmerge.TRACERNUM, custreturns.BOXNUM = custreturnsmerge.BOXNUM, custreturns.BOXSIZE = custreturnsmerge.BOXSIZE, custreturns.WHSE = custreturnsmerge.WHSE, custreturns.DIVISION = custreturnsmerge.DIVISION, custreturns.ORD_RETURNDATE = custreturnsmerge.ORD_RETURNDATE, custreturns.LPNUM = custreturnsmerge.LPNUM;";
 $querymerge = $conn1->prepare($sqlmerge);
 $querymerge->execute();

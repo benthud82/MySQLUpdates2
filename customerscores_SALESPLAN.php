@@ -428,7 +428,7 @@ $result1 = $conn1->prepare("SELECT
             custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
                 AND Y.SHIPTO = Z.SHIPTO
         WHERE
-            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollmonthdate'
+            Z.SALESPLAN = S.SALESPLAN and DELIVERDATE >= '$rollmonthdate'
         GROUP BY SALESPLAN) AS PERC_ONTIME_MNT,
                 (SELECT 
             (COUNT(*) - SUM(LATE)) / COUNT(*)
@@ -438,7 +438,7 @@ $result1 = $conn1->prepare("SELECT
             custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
                 AND Y.SHIPTO = Z.SHIPTO
         WHERE
-            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollqtrdate'
+            Z.SALESPLAN = S.SALESPLAN  and DELIVERDATE >= '$rollqtrdate'
         GROUP BY SALESPLAN) AS PERC_ONTIME_QTR,
                 (SELECT 
             (COUNT(*) - SUM(LATE)) / COUNT(*)
@@ -448,7 +448,7 @@ $result1 = $conn1->prepare("SELECT
             custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
                 AND Y.SHIPTO = Z.SHIPTO
         WHERE
-            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollyeardate'
+            Z.SALESPLAN = S.SALESPLAN and DELIVERDATE >= '$rollyeardate'
         GROUP BY SALESPLAN) AS PERC_ONTIME_R12,
     (SELECT 
             AVG(ACTUALDAYS)
@@ -458,7 +458,7 @@ $result1 = $conn1->prepare("SELECT
             custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
                 AND Y.SHIPTO = Z.SHIPTO
         WHERE
-            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollmonthdate'
+            Z.SALESPLAN = S.SALESPLAN  and DELIVERDATE >= '$rollmonthdate'
         GROUP BY SALESPLAN) AS AVG_TNT_MNT,
             (SELECT 
             AVG(ACTUALDAYS)
@@ -468,7 +468,7 @@ $result1 = $conn1->prepare("SELECT
             custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
                 AND Y.SHIPTO = Z.SHIPTO
         WHERE
-            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollqtrdate'
+            Z.SALESPLAN = S.SALESPLAN  and DELIVERDATE >= '$rollqtrdate'
         GROUP BY SALESPLAN) AS AVG_TNT_QTR,
             (SELECT 
             AVG(ACTUALDAYS)
@@ -478,16 +478,16 @@ $result1 = $conn1->prepare("SELECT
             custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
                 AND Y.SHIPTO = Z.SHIPTO
         WHERE
-            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollyeardate'
+            Z.SALESPLAN = S.SALESPLAN and DELIVERDATE >= '$rollyeardate'
         GROUP BY SALESPLAN) AS AVG_TNT_R12
 FROM
     custaudit.invlinesbyshipto L
         LEFT JOIN
-    custaudit.salesplan S ON S.BILLTO = L.BILLTONUM and S.SHIPTO = L.SHIPTONUM,
-    custaudit.fillratebyshipto F
+    custaudit.salesplan S ON S.BILLTO = L.BILLTONUM and S.SHIPTO = L.SHIPTONUM JOIN
+    custaudit.fillratebyshipto F on F.BILLTO = L.BILLTONUM
+        and F.SHIPTO = L.SHIPTONUM 
 WHERE
-    F.BILLTO = L.BILLTONUM
-        and F.SHIPTO = L.SHIPTONUM and S.SALESPLAN is NOT NULL 
+    S.SALESPLAN is NOT NULL 
 GROUP BY S.SALESPLAN;");
 
 $result1->execute();

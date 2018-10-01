@@ -11,7 +11,7 @@ include '../globalfunctions/custdbfunctions.php';
 
 //include '../globalincludes/ustxgpslotting_mysql.php';  //modelling connection
 
-$rowreturn = 50000;
+$rowreturn = 30000;
 $offset = 0;
 include '../connections/conn_custaudit.php';  //conn1
 $sqldelete = "TRUNCATE TABLE custaudit.customerscores_shipto_merge";
@@ -484,78 +484,71 @@ do {
                     'WQTY')
                     and RETURNDATE >= $rolling_12_start_1yyddd) / sum(ROLL_12_LINES))
     end) as ADDSCACCPERCR12,
-     (SELECT 
-            (COUNT(*) - SUM(LATE)) / COUNT(*)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN  and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollmonthdate'
-        GROUP BY Z.SHIPTO) AS PERC_ONTIME_MNT,
-                (SELECT 
-            (COUNT(*) - SUM(LATE)) / COUNT(*)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN   and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollqtrdate'
-        GROUP BY Z.SHIPTO) AS PERC_ONTIME_QTR,
-                (SELECT 
-            (COUNT(*) - SUM(LATE)) / COUNT(*)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN   and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollyeardate'
-        GROUP BY Z.SHIPTO) AS PERC_ONTIME_R12,
-    (SELECT 
-            AVG(ACTUALDAYS)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN   and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollmonthdate'
-        GROUP BY Z.SHIPTO) AS AVG_TNT_MNT,
-            (SELECT 
-            AVG(ACTUALDAYS)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN   and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollqtrdate'
-        GROUP BY Z.SHIPTO) AS AVG_TNT_QTR,
-            (SELECT 
-            AVG(ACTUALDAYS)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN   and Z.BILLTO = S.BILLTO and Z.SHIPTO = S.SHIPTO and DELIVERDATE >= '$rollyeardate'
-        GROUP BY Z.SHIPTO) AS AVG_TNT_R12
+    (SUM(CASE
+        WHEN DELIVERDATE >= '$rollmonthdate' THEN 1
+        ELSE 0
+    END) - SUM(CASE
+        WHEN DELIVERDATE >= '$rollmonthdate' AND LATE > 0 THEN 1
+        ELSE 0
+    END)) / SUM(CASE
+        WHEN DELIVERDATE >= '$rollmonthdate' THEN 1
+        ELSE 0
+    END) AS PERC_ONTIME_MNT,
+    (SUM(CASE
+        WHEN DELIVERDATE >= '$rollqtrdate' THEN 1
+        ELSE 0
+    END) - SUM(CASE
+        WHEN DELIVERDATE >= '$rollqtrdate' AND LATE > 0 THEN 1
+        ELSE 0
+    END)) / SUM(CASE
+        WHEN DELIVERDATE >= '$rollqtrdate' THEN 1
+        ELSE 0
+    END) AS PERC_ONTIME_QTR,
+    (SUM(CASE
+        WHEN DELIVERDATE >= '$rollyeardate' THEN 1
+        ELSE 0
+    END) - SUM(CASE
+        WHEN DELIVERDATE >= '$rollyeardate' AND LATE > 0 THEN 1
+        ELSE 0
+    END)) / SUM(CASE
+        WHEN DELIVERDATE >= '$rollyeardate' THEN 1
+        ELSE 0
+    END) AS PERC_ONTIME_R12,
+    AVG(CASE
+        WHEN DELIVERDATE >= '$rollmonthdate' THEN ACTUALDAYS
+        ELSE NULL
+    END) AS AVG_TNT_MNT,
+    AVG(CASE
+        WHEN DELIVERDATE >= '$rollqtrdate' THEN ACTUALDAYS
+        ELSE NULL
+    END) AS AVG_TNT_QTR,
+    AVG(CASE
+        WHEN DELIVERDATE >= '$rollyeardate' THEN ACTUALDAYS
+        ELSE NULL
+    END) AS AVG_TNT_R12
 FROM
     custaudit.invlinesbyshipto L
-            LEFT JOIN
-    custaudit.salesplan S ON S.BILLTO = L.BILLTONUM and S.SHIPTO = L.SHIPTONUM
-        join
+        LEFT JOIN
+    custaudit.salesplan S ON S.BILLTO = L.BILLTONUM
+        AND S.SHIPTO = L.SHIPTONUM
+        LEFT JOIN
     custaudit.fillratebyshipto F ON F.BILLTO = L.BILLTONUM
-        and F.SHIPTO = L.SHIPTONUM and (CUR_MONTH_SALES >= 750 or ROLL_12_SALES >= 10000)
+        AND F.SHIPTO = L.SHIPTONUM
+        LEFT JOIN
+    custaudit.delivery_dates D ON D.BILLTO = L.BILLTONUM
+        AND D.SHIPTO = L.SHIPTONUM
+WHERE
+    (CUR_MONTH_SALES >= 750
+        OR ROLL_12_SALES >= 10000)
 GROUP BY L.BILLTONUM , L.SHIPTONUM LIMIT $offset, $rowreturn;");
 
     $result1->execute();
     $masterdisplayarray = $result1->fetchAll(pdo::FETCH_ASSOC);
 
+        if (count($masterdisplayarray) == 0) {
+        break;
+    }
+    
     foreach ($masterdisplayarray as $key => $value) {
 
         $BILLTONUM = $masterdisplayarray[$key]['BILLTONUM'];
@@ -1490,7 +1483,7 @@ ONTIMEMNT, ONTIMEQTR, ONTIMER12, SLOPEONTIMEMNT, SLOPEONTIMEQTR, SLOPEONTIMER12,
         $maxrange += 1000;
     } while ($counter <= $rowcount);
 
-    $offset += 50000;
+    $offset += 30000;
 } while ($offset <= 999999);
 
 $sqldelete2 = "TRUNCATE TABLE custaudit.customerscores_shipto";

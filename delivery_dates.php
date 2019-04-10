@@ -11,6 +11,10 @@ include '../globalfunctions/custdbfunctions.php';
 include '../connections/conn_custaudit.php';  //conn1
 //include '../globalincludes/ustxgpslotting_mysql.php';  //modelling connection
 
+$rollmonthdate = date('Y-m-d', strtotime('-30 days'));
+$rollqtrdate = date('Y-m-d', strtotime('-90 days'));
+$rollyeardate = date('Y-m-d', strtotime('-365 days'));
+
 $sqldelete2 = "TRUNCATE TABLE custaudit.delivery_dates_merge";
 $querydelete2 = $conn1->prepare($sqldelete2);
 $querydelete2->execute();
@@ -110,15 +114,25 @@ foreach ($datesarray as $value) {
 
 //select all from the merge table and join with the standard times in transit table to determine if ontime
         $dayscalc = $conn1->prepare("INSERT IGNORE INTO delivery_dates_merge
-                                                                            SELECT 
+                                                                             SELECT 
                                                                                 A.*,
-                                                                                DAYS AS SHOULDDAYS,
+                                                                                DAYS + (SELECT 
+                                                                                        COUNT(*)
+                                                                                    FROM
+                                                                                        custaudit.ups_holiday
+                                                                                    WHERE
+                                                                                        (upsholiday_date BETWEEN SHIPDATE AND DELIVERDATE)) AS SHOULDDAYS,
                                                                                 5 * (DATEDIFF(DELIVERDATE, SHIPDATE) DIV 7) + MID('0123444401233334012222340111123400001234000123440',
                                                                                     7 * WEEKDAY(SHIPDATE) + WEEKDAY(DELIVERDATE) + 1,
                                                                                     1) AS ACTUALDAYS,
                                                                                 CASE
                                                                                     WHEN
-                                                                                        DAYS < 5 * (DATEDIFF(DELIVERDATE, SHIPDATE) DIV 7) + MID('0123444401233334012222340111123400001234000123440',
+                                                                                        DAYS + (SELECT 
+                                                                                                COUNT(*)
+                                                                                            FROM
+                                                                                                custaudit.ups_holiday
+                                                                                            WHERE
+                                                                                                (upsholiday_date BETWEEN SHIPDATE AND DELIVERDATE)) < 5 * (DATEDIFF(DELIVERDATE, SHIPDATE) DIV 7) + MID('0123444401233334012222340111123400001234000123440',
                                                                                             7 * WEEKDAY(SHIPDATE) + WEEKDAY(DELIVERDATE) + 1,
                                                                                             1)
                                                                                     THEN
@@ -130,7 +144,7 @@ foreach ($datesarray as $value) {
                                                                                     JOIN
                                                                                 custaudit.transit_times B ON A.WHSE = B.SHIPDC
                                                                                     AND A.ZIPCODE = B.ZIPCODE");
-        $dayscalc->execute();
+                                                                                    $dayscalc->execute();
 
 
         //once merge table has been populated, insert on duplicate key update here.
@@ -154,4 +168,85 @@ foreach ($datesarray as $value) {
 }
 
 
+//populate tnt_summary table
+
+$sqldelete5 = "TRUNCATE TABLE custaudit.tnt_summary";
+$querydelete5 = $conn1->prepare($sqldelete5);
+$querydelete5->execute();
+
+$sqlmerge2 = "INSERT INTO custaudit.tnt_summary (tnt_billto, tnt_shipto, tnt_boxes_mnt, tnt_late_mnt, tnt_mnt_ontime, tnt_boxes_qtr, tnt_late_qtr, tnt_qtr_ontime, tnt_boxes_r12, tnt_late_r12, tnt_r12_ontime, tnt_avg_mnt, tnt_avg_qtr, tnt_avg_r12)
+SELECT 
+    BILLTO, SHIPTO,
+        SUM(CASE
+        WHEN DELIVERDATE >= '$rollmonthdate' THEN 1
+        ELSE 0
+    END) AS BOXES_MNT,
+        SUM(CASE
+        WHEN DELIVERDATE >= '$rollmonthdate' AND LATE > 0 THEN 1
+        ELSE 0
+    END) AS LATE_MNT,
+    (SUM(CASE
+        WHEN DELIVERDATE >= '$rollmonthdate' THEN 1
+        ELSE 0
+    END) - SUM(CASE
+        WHEN DELIVERDATE >= '$rollmonthdate' AND LATE > 0 THEN 1
+        ELSE 0
+    END)) / SUM(CASE
+        WHEN DELIVERDATE >= '$rollmonthdate' THEN 1
+        ELSE 0
+    END) AS PERC_ONTIME_MNT,
+    SUM(CASE
+        WHEN DELIVERDATE >= '$rollqtrdate' THEN 1
+        ELSE 0
+    END) AS BOXES_QTR,
+    SUM(CASE
+        WHEN DELIVERDATE >= '$rollqtrdate' AND LATE > 0 THEN 1
+        ELSE 0
+    END) AS LATE_QTR,
+    (SUM(CASE
+        WHEN DELIVERDATE >= '$rollqtrdate' THEN 1
+        ELSE 0
+    END) - SUM(CASE
+        WHEN DELIVERDATE >= '$rollqtrdate' AND LATE > 0 THEN 1
+        ELSE 0
+    END)) / SUM(CASE
+        WHEN DELIVERDATE >= '$rollqtrdate' THEN 1
+        ELSE 0
+    END) AS PERC_ONTIME_QTR,
+            SUM(CASE
+        WHEN DELIVERDATE >= '$rollyeardate' THEN 1
+        ELSE 0
+    END) AS BOXES_R12,
+        SUM(CASE
+        WHEN DELIVERDATE >= '$rollyeardate' AND LATE > 0 THEN 1
+        ELSE 0
+    END) AS LATE_R12,
+    (SUM(CASE
+        WHEN DELIVERDATE >= '$rollyeardate' THEN 1
+        ELSE 0
+    END) - SUM(CASE
+        WHEN DELIVERDATE >= '$rollyeardate' AND LATE > 0 THEN 1
+        ELSE 0
+    END)) / SUM(CASE
+        WHEN DELIVERDATE >= '$rollyeardate' THEN 1
+        ELSE 0
+    END) AS PERC_ONTIME_R12,
+    AVG(CASE
+        WHEN DELIVERDATE >= '$rollmonthdate' THEN ACTUALDAYS
+        ELSE NULL
+    END) AS AVG_TNT_MNT,
+    AVG(CASE
+        WHEN DELIVERDATE >= '$rollqtrdate' THEN ACTUALDAYS
+        ELSE NULL
+    END) AS AVG_TNT_QTR,
+    AVG(CASE
+        WHEN DELIVERDATE >= '$rollyeardate' THEN ACTUALDAYS
+        ELSE NULL
+    END) AS AVG_TNT_R12
+FROM
+    custaudit.delivery_dates 
+GROUP BY BILLTO, SHIPTO
+";
+$querymerge2 = $conn1->prepare($sqlmerge2);
+$querymerge2->execute();
 

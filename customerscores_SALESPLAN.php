@@ -420,72 +420,25 @@ $result1 = $conn1->prepare("SELECT
                     'WQTY')
                     and RETURNDATE >= $rolling_12_start_1yyddd and Q.SALESPLAN = S.SALESPLAN) / sum(ROLL_12_LINES))
     end) as ADDSCACCPERCR12,
-        (SELECT 
-            (COUNT(*) - SUM(LATE)) / COUNT(*)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN and DELIVERDATE >= '$rollmonthdate'
-        GROUP BY SALESPLAN) AS PERC_ONTIME_MNT,
-                (SELECT 
-            (COUNT(*) - SUM(LATE)) / COUNT(*)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN  and DELIVERDATE >= '$rollqtrdate'
-        GROUP BY SALESPLAN) AS PERC_ONTIME_QTR,
-                (SELECT 
-            (COUNT(*) - SUM(LATE)) / COUNT(*)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN and DELIVERDATE >= '$rollyeardate'
-        GROUP BY SALESPLAN) AS PERC_ONTIME_R12,
-    (SELECT 
-            AVG(ACTUALDAYS)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN  and DELIVERDATE >= '$rollmonthdate'
-        GROUP BY SALESPLAN) AS AVG_TNT_MNT,
-            (SELECT 
-            AVG(ACTUALDAYS)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN  and DELIVERDATE >= '$rollqtrdate'
-        GROUP BY SALESPLAN) AS AVG_TNT_QTR,
-            (SELECT 
-            AVG(ACTUALDAYS)
-        FROM
-            custaudit.delivery_dates Y
-                JOIN
-            custaudit.salesplan Z ON Y.BILLTO = Z.BILLTO
-                AND Y.SHIPTO = Z.SHIPTO
-        WHERE
-            Z.SALESPLAN = S.SALESPLAN and DELIVERDATE >= '$rollyeardate'
-        GROUP BY SALESPLAN) AS AVG_TNT_R12
+         1 - (SUM(tnt_late_mnt) / SUM(tnt_boxes_mnt)) AS PERC_ONTIME_MNT,
+    sum(tnt_boxes_qtr) as BOXES_QTR,
+    sum(tnt_late_qtr) as LATE_QTR,
+    1 - (SUM(tnt_late_qtr) / SUM(tnt_boxes_qtr)) AS PERC_ONTIME_QTR,
+    1 - (SUM(tnt_late_r12) / SUM(tnt_boxes_r12)) AS PERC_ONTIME_R12,
+    avg(tnt_avg_mnt) as AVG_TNT_MNT ,
+    avg(tnt_avg_qtr) as AVG_TNT_QTR ,
+    avg(tnt_avg_r12) as AVG_TNT_R12 
+
+
+
 FROM
     custaudit.invlinesbyshipto L
         LEFT JOIN
-    custaudit.salesplan S ON S.BILLTO = L.BILLTONUM and S.SHIPTO = L.SHIPTONUM JOIN
+    custaudit.salesplan S ON S.BILLTO = L.BILLTONUM and S.SHIPTO = L.SHIPTONUM 
+        LEFT JOIN
     custaudit.fillratebyshipto F on F.BILLTO = L.BILLTONUM
         and F.SHIPTO = L.SHIPTONUM 
+  LEFT JOIN custaudit.tnt_summary  M ON M.tnt_billto = L.BILLTONUM and M.tnt_shipto = L.SHIPTONUM
 WHERE
     S.SALESPLAN is NOT NULL 
 GROUP BY S.SALESPLAN;");

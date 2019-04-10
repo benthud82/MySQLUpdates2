@@ -17,6 +17,7 @@ $queryinsert->execute();
 
 
 $deletdate = date('Y-m-d', strtotime("-15 days"));
+$unscanneddate = date('Y-m-d', strtotime("-5 days"));
 $sqldelete = "DELETE FROM  printvis.allcart_history WHERE dateaddedtotable < '$deletdate'";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
@@ -178,7 +179,28 @@ foreach ($whsearray as $whsesel) {
     } while ($counter <= $rowcount); //end of do loop for tote times
 }
 
-
+//update unscanned cases
+$sqlinsert2 = "INSERT IGNORE into printvis.unscannedcases
+                            SELECT 
+                                casebatches_cart,
+                                casebatches_printdate,
+                                casebatches_whse,
+                                casebatches_build,
+                                casebatches_equipment,
+                                casebatches_lines,
+                                casebatches_time_final
+                            FROM
+                                printvis.casebatches_time_hist
+                                    LEFT JOIN
+                                printvis.casebatchstarttime_hist ON starttime_whse = casebatches_whse
+                                    AND starttime_batch = casebatches_cart
+                                    AND DATE(starttime_starttime) = DATE(casebatches_printdate)
+                            WHERE
+                                DATE(casebatches_printdate) >= '$unscanneddate' and DATE(casebatches_printdate) <> CURDATE()
+                                    AND starttime_whse IS NULL
+                                    AND (casebatches_equipment <> 'REACH')";
+$queryinsert2 = $conn1->prepare($sqlinsert2);
+$queryinsert2->execute();
 
 
 

@@ -11,7 +11,7 @@ include '../globalfunctions/custdbfunctions.php';
 
 //include '../globalincludes/ustxgpslotting_mysql.php';  //modelling connection
 
-$rowreturn = 30000;
+$rowreturn = 10000;
 $offset = 0;
 include '../connections/conn_custaudit.php';  //conn1
 $sqldelete = "TRUNCATE TABLE custaudit.customerscores_shipto_merge";
@@ -484,48 +484,16 @@ do {
                     'WQTY')
                     and RETURNDATE >= $rolling_12_start_1yyddd) / sum(ROLL_12_LINES))
     end) as ADDSCACCPERCR12,
-    (SUM(CASE
-        WHEN DELIVERDATE >= '$rollmonthdate' THEN 1
-        ELSE 0
-    END) - SUM(CASE
-        WHEN DELIVERDATE >= '$rollmonthdate' AND LATE > 0 THEN 1
-        ELSE 0
-    END)) / SUM(CASE
-        WHEN DELIVERDATE >= '$rollmonthdate' THEN 1
-        ELSE 0
-    END) AS PERC_ONTIME_MNT,
-    (SUM(CASE
-        WHEN DELIVERDATE >= '$rollqtrdate' THEN 1
-        ELSE 0
-    END) - SUM(CASE
-        WHEN DELIVERDATE >= '$rollqtrdate' AND LATE > 0 THEN 1
-        ELSE 0
-    END)) / SUM(CASE
-        WHEN DELIVERDATE >= '$rollqtrdate' THEN 1
-        ELSE 0
-    END) AS PERC_ONTIME_QTR,
-    (SUM(CASE
-        WHEN DELIVERDATE >= '$rollyeardate' THEN 1
-        ELSE 0
-    END) - SUM(CASE
-        WHEN DELIVERDATE >= '$rollyeardate' AND LATE > 0 THEN 1
-        ELSE 0
-    END)) / SUM(CASE
-        WHEN DELIVERDATE >= '$rollyeardate' THEN 1
-        ELSE 0
-    END) AS PERC_ONTIME_R12,
-    AVG(CASE
-        WHEN DELIVERDATE >= '$rollmonthdate' THEN ACTUALDAYS
-        ELSE NULL
-    END) AS AVG_TNT_MNT,
-    AVG(CASE
-        WHEN DELIVERDATE >= '$rollqtrdate' THEN ACTUALDAYS
-        ELSE NULL
-    END) AS AVG_TNT_QTR,
-    AVG(CASE
-        WHEN DELIVERDATE >= '$rollyeardate' THEN ACTUALDAYS
-        ELSE NULL
-    END) AS AVG_TNT_R12
+    
+    1 - (SUM(tnt_late_mnt) / SUM(tnt_boxes_mnt)) AS PERC_ONTIME_MNT,
+    sum(tnt_boxes_qtr) as BOXES_QTR,
+    sum(tnt_late_qtr) as LATE_QTR,
+    1 - (SUM(tnt_late_qtr) / SUM(tnt_boxes_qtr)) AS PERC_ONTIME_QTR,
+    1 - (SUM(tnt_late_r12) / SUM(tnt_boxes_r12)) AS PERC_ONTIME_R12,
+    avg(tnt_avg_mnt) as AVG_TNT_MNT ,
+    avg(tnt_avg_qtr) as AVG_TNT_QTR ,
+    avg(tnt_avg_r12) as AVG_TNT_R12 
+
 FROM
     custaudit.invlinesbyshipto L
         LEFT JOIN
@@ -534,26 +502,27 @@ FROM
         LEFT JOIN
     custaudit.fillratebyshipto F ON F.BILLTO = L.BILLTONUM
         AND F.SHIPTO = L.SHIPTONUM
-        LEFT JOIN
-    custaudit.delivery_dates D ON D.BILLTO = L.BILLTONUM
-        AND D.SHIPTO = L.SHIPTONUM
+              LEFT JOIN custaudit.tnt_summary  M ON M.tnt_billto = L.BILLTONUM and M.tnt_shipto = L.SHIPTONUM
 WHERE
     (CUR_MONTH_SALES >= 750
-        OR ROLL_12_SALES >= 10000)
+        OR ROLL_12_SALES >= 10000) and L.BILLTONUM = 1742575
 GROUP BY L.BILLTONUM , L.SHIPTONUM LIMIT $offset, $rowreturn;");
 
     $result1->execute();
     $masterdisplayarray = $result1->fetchAll(pdo::FETCH_ASSOC);
 
-        if (count($masterdisplayarray) == 0) {
+
+
+    if (count($masterdisplayarray) == 0) {
         break;
     }
-    
+
     foreach ($masterdisplayarray as $key => $value) {
 
         $BILLTONUM = $masterdisplayarray[$key]['BILLTONUM'];
         $BILLTONAME = $masterdisplayarray[$key]['BILL_TO_NAME'];
         $SHIPTONUM = $masterdisplayarray[$key]['SHIPTONUM'];
+
         $SHIPTONAME = $masterdisplayarray[$key]['SHIP_TO_NAME'];
         $TOTMONTHLINES = $masterdisplayarray[$key]['TOTMONTHLINES'];
         $TOTMONTHCOGS = $masterdisplayarray[$key]['TOTMONTHCOGS'];
@@ -618,6 +587,7 @@ GROUP BY L.BILLTONUM , L.SHIPTONUM LIMIT $offset, $rowreturn;");
         $AVG_TNT_MNT = $masterdisplayarray[$key]['AVG_TNT_MNT'];
         $AVG_TNT_QTR = $masterdisplayarray[$key]['AVG_TNT_QTR'];
         $AVG_TNT_R12 = $masterdisplayarray[$key]['AVG_TNT_R12'];
+
 
 //********Have to add sales plan to OSC data!!!! ****************
 //Order Shipped Complete Data
@@ -1483,7 +1453,7 @@ ONTIMEMNT, ONTIMEQTR, ONTIMER12, SLOPEONTIMEMNT, SLOPEONTIMEQTR, SLOPEONTIMER12,
         $maxrange += 1000;
     } while ($counter <= $rowcount);
 
-    $offset += 30000;
+    $offset += 10000;
 } while ($offset <= 999999);
 
 $sqldelete2 = "TRUNCATE TABLE custaudit.customerscores_shipto";

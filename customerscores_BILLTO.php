@@ -27,6 +27,64 @@ $roll_month_start_1yyddd = _rollmonth1yyddd();  //call current month function to
 $roll_quarter_start_1yyddd = _rollquarter1yyddd();  //call current quarter function to find start for for current quarter for sql
 //Find first day for rolling 12 month 1yyddd
 $rolling_12_start_1yyddd = _rolling12start1yyddd();  //call rolling start function to find start date for rolling 12 month sql
+//pull in delivery times separately
+//    $deldatesql = $conn1->prepare("SELECT 
+//    BILLTO,
+//    (SUM(CASE
+//        WHEN DELIVERDATE >= '$rollmonthdate' THEN 1
+//        ELSE 0
+//    END) - SUM(CASE
+//        WHEN DELIVERDATE >= '$rollmonthdate' AND LATE > 0 THEN 1
+//        ELSE 0
+//    END)) / SUM(CASE
+//        WHEN DELIVERDATE >= '$rollmonthdate' THEN 1
+//        ELSE 0
+//    END) AS PERC_ONTIME_MNT,
+//    SUM(CASE
+//        WHEN DELIVERDATE >= '$rollqtrdate' THEN 1
+//        ELSE 0
+//    END) AS BOXES_QTR,
+//    SUM(CASE
+//        WHEN DELIVERDATE >= '$rollqtrdate' AND LATE > 0 THEN 1
+//        ELSE 0
+//    END) AS LATE_QTR,
+//    (SUM(CASE
+//        WHEN DELIVERDATE >= '$rollqtrdate' THEN 1
+//        ELSE 0
+//    END) - SUM(CASE
+//        WHEN DELIVERDATE >= '$rollqtrdate' AND LATE > 0 THEN 1
+//        ELSE 0
+//    END)) / SUM(CASE
+//        WHEN DELIVERDATE >= '$rollqtrdate' THEN 1
+//        ELSE 0
+//    END) AS PERC_ONTIME_QTR,
+//    (SUM(CASE
+//        WHEN DELIVERDATE >= '$rollyeardate' THEN 1
+//        ELSE 0
+//    END) - SUM(CASE
+//        WHEN DELIVERDATE >= '$rollyeardate' AND LATE > 0 THEN 1
+//        ELSE 0
+//    END)) / SUM(CASE
+//        WHEN DELIVERDATE >= '$rollyeardate' THEN 1
+//        ELSE 0
+//    END) AS PERC_ONTIME_R12,
+//    AVG(CASE
+//        WHEN DELIVERDATE >= '$rollmonthdate' THEN ACTUALDAYS
+//        ELSE NULL
+//    END) AS AVG_TNT_MNT,
+//    AVG(CASE
+//        WHEN DELIVERDATE >= '$rollqtrdate' THEN ACTUALDAYS
+//        ELSE NULL
+//    END) AS AVG_TNT_QTR,
+//    AVG(CASE
+//        WHEN DELIVERDATE >= '$rollyeardate' THEN ACTUALDAYS
+//        ELSE NULL
+//    END) AS AVG_TNT_R12
+//FROM
+//    custaudit.delivery_dates
+//GROUP BY BILLTO");
+//    $deldatesql->execute();
+//    $deldatearray = $deldatesql->fetchAll(pdo::FETCH_ASSOC);
 
 do {
 
@@ -450,56 +508,17 @@ do {
                     'WQTY')
                     and RETURNDATE >= $rolling_12_start_1yyddd) / sum(ROLL_12_LINES))
     end) as ADDSCACCPERCR12,
-    (SUM(CASE
-        WHEN DELIVERDATE >= '2018-08-11' THEN 1
-        ELSE 0
-    END) - SUM(CASE
-        WHEN DELIVERDATE >= '2018-08-11' AND LATE > 0 THEN 1
-        ELSE 0
-    END)) / SUM(CASE
-        WHEN DELIVERDATE >= '2018-08-11' THEN 1
-        ELSE 0
-    END) AS PERC_ONTIME_MNT,
-    SUM(CASE
-        WHEN DELIVERDATE >= '2018-06-11' THEN 1
-        ELSE 0
-    END) AS BOXES_QTR,
-    SUM(CASE
-        WHEN DELIVERDATE >= '2018-06-11' AND LATE > 0 THEN 1
-        ELSE 0
-    END) AS LATE_QTR,
-    (SUM(CASE
-        WHEN DELIVERDATE >= '2018-06-11' THEN 1
-        ELSE 0
-    END) - SUM(CASE
-        WHEN DELIVERDATE >= '2018-06-11' AND LATE > 0 THEN 1
-        ELSE 0
-    END)) / SUM(CASE
-        WHEN DELIVERDATE >= '2018-06-11' THEN 1
-        ELSE 0
-    END) AS PERC_ONTIME_QTR,
-    (SUM(CASE
-        WHEN DELIVERDATE >= '2017-06-11' THEN 1
-        ELSE 0
-    END) - SUM(CASE
-        WHEN DELIVERDATE >= '2017-06-11' AND LATE > 0 THEN 1
-        ELSE 0
-    END)) / SUM(CASE
-        WHEN DELIVERDATE >= '2017-06-11' THEN 1
-        ELSE 0
-    END) AS PERC_ONTIME_R12,
-    AVG(CASE
-        WHEN DELIVERDATE >= '2018-08-11' THEN ACTUALDAYS
-        ELSE NULL
-    END) AS AVG_TNT_MNT,
-    AVG(CASE
-        WHEN DELIVERDATE >= '2018-06-11' THEN ACTUALDAYS
-        ELSE NULL
-    END) AS AVG_TNT_QTR,
-    AVG(CASE
-        WHEN DELIVERDATE >= '2017-06-11' THEN ACTUALDAYS
-        ELSE NULL
-    END) AS AVG_TNT_R12
+    
+    1 - (SUM(tnt_late_mnt) / SUM(tnt_boxes_mnt)) AS PERC_ONTIME_MNT,
+    sum(tnt_boxes_qtr) as BOXES_QTR,
+    sum(tnt_late_qtr) as LATE_QTR,
+    1 - (SUM(tnt_late_qtr) / SUM(tnt_boxes_qtr)) AS PERC_ONTIME_QTR,
+    1 - (SUM(tnt_late_r12) / SUM(tnt_boxes_r12)) AS PERC_ONTIME_R12,
+    avg(tnt_avg_mnt) as AVG_TNT_MNT ,
+    avg(tnt_avg_qtr) as AVG_TNT_QTR ,
+    avg(tnt_avg_r12) as AVG_TNT_R12 
+
+
 FROM
     custaudit.invlinesbyshipto L
         LEFT JOIN
@@ -508,16 +527,17 @@ FROM
         LEFT JOIN
     custaudit.fillratebyshipto F ON F.BILLTO = L.BILLTONUM
         AND F.SHIPTO = L.SHIPTONUM
-        LEFT JOIN
-    custaudit.delivery_dates D ON D.BILLTO = L.BILLTONUM
-        AND D.SHIPTO = L.SHIPTONUM
+        LEFT JOIN custaudit.tnt_summary  M ON M.tnt_billto = L.BILLTONUM and M.tnt_shipto = L.SHIPTONUM
 WHERE
     F.BILLTO = L.BILLTONUM
-        and F.SHIPTO = L.SHIPTONUM and (CUR_MONTH_SALES >= 1200 or ROLL_12_SALES >= 15000)
+        and F.SHIPTO = L.SHIPTONUM and (CUR_MONTH_SALES >= 1200 or ROLL_12_SALES >= 15000) 
 GROUP BY L.BILLTONUM  LIMIT $offset, $rowreturn;");
 
     $result1->execute();
     $masterdisplayarray = $result1->fetchAll(pdo::FETCH_ASSOC);
+
+
+
 
     if (count($masterdisplayarray) == 0) {
         break;

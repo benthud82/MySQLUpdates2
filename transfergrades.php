@@ -1,26 +1,37 @@
 <?php
 
 set_time_limit(99999);
-$dbtype = "mysql";
-$dbhost = "nahsifljaws01"; // Host name 
-$dbuser = "slotadmin"; // Mysql username 
-$dbpass = "slotadmin"; // Mysql password 
-$dbname = "slotting"; // Database name 
-$table = "transfergrades"; // Table name
-$conn1 = new PDO("{$dbtype}:host={$dbhost};dbname={$dbname};charset=utf8", $dbuser, $dbpass, array(
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_EMULATE_PREPARES => false,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC));
-$server = "Driver={Client Access ODBC Driver (32-bit)};System=A;Uid=user;Pwd=password;"; #the name of the iSeries
-$user = "BHUD01"; #a valid username that will connect to the DB
-$pass = "tucker1234"; #a password for the username
-$conn = odbc_connect($server, $user, $pass); #you may have to remove quotes
-if (!$conn) {
-    print db2_conn_errormsg();
-}
 
-#Query the Database into a result set - 
-$result = odbc_exec($conn, "SELECT NPFPHO.HOWHSE as TOWHSE,NPFPDO.ITMCDE as ITMCDE,NPFPHO.PONUMB,(CASE WHEN (NPFPHO.PODATE<99999) THEN (date(('20' || RIGHT(NPFPHO.PODATE,2)) || '-' || substr(NPFPHO.PODATE,1,1) || '-' || substr(NPFPHO.PODATE,2,2))) WHEN NPFPHO.PODATE>99999 THEN (date(('20' || RIGHT(NPFPHO.PODATE,2)) || '-' || substr(NPFPHO.PODATE,1,2) || '-' || substr(NPFPHO.PODATE,3,2))) END) as PODATE , cast(right(NPFPHO.SUPPLR,2) as int) as FromWhs,NPFPDO.PURQTY as XFER_QTY,NPFPHO.PQTYP1 FROM  HSIPCORDTA.NPFPDO NPFPDO, HSIPCORDTA.NPFPHO NPFPHO WHERE NPFPHO.PQTYP2 = 'TR'  And NPFPHO.HOWHSE = NPFPDO.DOWHSE AND NPFPHO.PONUMB = NPFPDO.PONUMB AND (CASE WHEN (DAYS(CURRENT DATE) - (DAYS(CURRENT DATE)/7)*7) <= 1  THEN (CURRENT DATE - 3 Days)  WHEN (DAYS(CURRENT DATE) - (DAYS(CURRENT DATE)/7)*7) > 1 THEN (CURRENT DATE - 1 Days) END) = (CASE WHEN (NPFPHO.PODATE<99999) THEN (date(('20' || RIGHT(NPFPHO.PODATE,2)) || '-' || substr(NPFPHO.PODATE,1,1) || '-' || substr(NPFPHO.PODATE,2,2))) WHEN NPFPHO.PODATE>99999 THEN (date(('20' || RIGHT(NPFPHO.PODATE,2)) || '-' || substr(NPFPHO.PODATE,1,2) || '-' || substr(NPFPHO.PODATE,3,2))) END) and NPFPHO.HOWHSE in (2,3,6,7,9) and cast(right(NPFPHO.SUPPLR,2) as int) in (2,3,6,7,9)");
+include '../connections/conn_slotting.php';
+include '../globalincludes/usa_asys.php';
+
+
+$baycube = $conn1->prepare("SELECT NPFPHO.HOWHSE as TOWHSE
+                                                            NPFPDO.ITMCDE as ITMCDE,
+                                                            NPFPHO.PONUMB,
+                                                            (CASE WHEN (NPFPHO.PODATE<99999) 
+                                                                            THEN (date(('20' || RIGHT(NPFPHO.PODATE,2)) || '-' || substr(NPFPHO.PODATE,1,1) || '-' || substr(NPFPHO.PODATE,2,2))) 
+                                                                WHEN NPFPHO.PODATE>99999 
+                                                                            THEN (date(('20' || RIGHT(NPFPHO.PODATE,2)) || '-' || substr(NPFPHO.PODATE,1,2) || '-' || substr(NPFPHO.PODATE,3,2))) END) as PODATE , 
+                                                            cast(right(NPFPHO.SUPPLR,2) as int) as FromWhs,
+                                                            NPFPDO.PURQTY as XFER_QTY,
+                                                            NPFPHO.PQTYP1 
+                                                    FROM  HSIPCORDTA.NPFPDO, 
+                                                    HSIPCORDTA.NPFPHO 
+                                                    WHERE NPFPHO.PQTYP2 = 'TR'  And 
+                                                                NPFPHO.HOWHSE = NPFPDO.DOWHSE AND 
+                                                                NPFPHO.PONUMB = NPFPDO.PONUMB AND 
+                                                                (CASE WHEN (DAYS(CURRENT DATE) - (DAYS(CURRENT DATE)/7)*7) <= 1  
+                                                                    THEN (CURRENT DATE - 3 Days)  WHEN (DAYS(CURRENT DATE) - (DAYS(CURRENT DATE)/7)*7) > 1 
+                                                                    THEN (CURRENT DATE - 1 Days) END) = (CASE WHEN (NPFPHO.PODATE<99999) 
+                                                                    THEN (date(('20' || RIGHT(NPFPHO.PODATE,2)) || '-' || substr(NPFPHO.PODATE,1,1) || '-' || substr(NPFPHO.PODATE,2,2))) 
+                                                                WHEN NPFPHO.PODATE>99999 
+                                                                    THEN (date(('20' || RIGHT(NPFPHO.PODATE,2)) || '-' || substr(NPFPHO.PODATE,1,2) || '-' || substr(NPFPHO.PODATE,3,2))) END) 
+                                                            and NPFPHO.HOWHSE in (2,3,6,7,9) and cast(right(NPFPHO.SUPPLR,2) as int) in (2,3,6,7,9)");
+$baycube->execute();
+$baycubearray = $baycube->fetchAll(pdo::FETCH_ASSOC);
+
+
 
 while (odbc_fetch_row($result)) {
     $subarray = array();

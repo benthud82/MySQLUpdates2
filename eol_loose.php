@@ -6,43 +6,44 @@ ini_set('memory_limit', '-1');
 include_once '../Off_System_Slotting/connection/connection_details.php';
 include_once '../globalincludes/usa_asys.php';
 $deletedate = $today = date('Y-m-d', strtotime("-90 days"));
-$yesterday = date('Y-m-d', strtotime("-3 days"));
+$yesterday = date('Y-m-d', strtotime("-20 days"));
 $sqldelete = "DELETE FROM printvis.eol_loose WHERE date(eolloose_datetime) <= '$deletedate' ";
 $querydelete2 = $conn1->prepare($sqldelete);
 $querydelete2->execute();
 
-$columns = '';
+$columns = 'eolloose_whs, eolloose_build, eolloose_batch, eolloose_function, eolloose_lpnum, eolloose_tote,  eolloose_boxsize, eolloose_boxlines, eolloose_tsm, eolloose_wi, eolloose_ce, eolloose_mi, eolloose_ai, eolloose_pe, eolloose_err6, eolloose_err7, eolloose_err8, eolloose_item, eolloose_pkgu, eolloose_datetime, eolloose_packid, eolloose_expflag';
 
-$eolcasesql = $aseriesconn->prepare("SELECT trim(substring(NVOFLT, 3, 2)) as WHS,
-                                                                          trim(substring(NVOFLT, 5, 2)) as BUILD, 
-                                                                          trim(substring(NVOFLT, 7, 5)) as BATCH, 
-                                                                          trim(substring(NVOFLT, 12, 6)) as FUNCT, 
-                                                                          trim(substring(NVOFLT, 18, 3)) as EQTYPE, 
-                                                                          trim(substring(NVOFLT, 21, 9)) as LPNUM, 
-                                                                          trim(substring(NVOFLT, 30, 5)) as BOXNUM, 
-                                                                          trim(substring(NVOFLT, 35, 3)) as TOTENUM, 
-                                                                          trim(substring(NVOFLT, 38, 10)) as TSM, 
-                                                                          trim(substring(NVOFLT, 48, 2)) as OT, 
-                                                                          trim(substring(NVOFLT, 50, 2)) as RA, 
-                                                                          trim(substring(NVOFLT, 52, 2)) as ERR3, 
-                                                                          trim(substring(NVOFLT, 54, 2)) as ERR4, 
-                                                                          trim(substring(NVOFLT, 56, 2)) as ERR5, 
-                                                                          trim(substring(NVOFLT, 58, 2)) as ERR6, 
-                                                                          trim(substring(NVOFLT, 60, 2)) as ERR7, 
-                                                                          trim(substring(NVOFLT, 62, 2)) as ERR8, 
-                                                                          trim(substring(NVOFLT, 64, 7)) as ITEM, 
-                                                                          trim(substring(NVOFLT, 71, 26)) as DATE_TIME, 
-                                                                          trim(substring(NVOFLT, 97, 11)) as PACKID, 
-                                                                          trim(substring(NVOFLT, 108, 1)) as EXPFLAG 
-                                                            FROM HSIPCORDTA.NOFCOL
-                                                            WHERE date(trim(substring(NVOFLT, 71, 26))) >= '$yesterday' ");
-$eolcasesql->execute();
-$eolcasearray = $eolcasesql->fetchAll(pdo::FETCH_ASSOC);
+$eolloosesql = $aseriesconn->prepare("SELECT trim(substring(NVEFLT, 3, 2)) as WHS,
+                                                                                    trim(substring(NVEFLT, 5, 2)) as BUILD, 
+                                                                                    trim(substring(NVEFLT, 7, 5)) as BATCH, 
+                                                                                    trim(substring(NVEFLT, 12, 6)) as FUNCT, 
+                                                                                    trim(substring(NVEFLT, 18, 9)) as LPNUM, 
+                                                                                    trim(substring(NVEFLT, 27, 3)) as TOTENUM, 
+                                                                                    trim(substring(NVEFLT, 30, 3)) as BOXSIZE, 
+                                                                                    trim(substring(NVEFLT, 33, 3)) as BOXLINES, 
+                                                                                    trim(substring(NVEFLT, 36, 10)) as TSM, 
+                                                                                    trim(substring(NVEFLT, 46, 2)) as WI, 
+                                                                                    trim(substring(NVEFLT, 48, 2)) as CE, 
+                                                                                    trim(substring(NVEFLT, 50, 2)) as MI, 
+                                                                                    trim(substring(NVEFLT, 52, 2)) as AI, 
+                                                                                    trim(substring(NVEFLT, 54, 2)) as PE, 
+                                                                                    trim(substring(NVEFLT, 56, 2)) as ERR6, 
+                                                                                    trim(substring(NVEFLT, 58, 2)) as ERR7, 
+                                                                                    trim(substring(NVEFLT, 60, 2)) as ERR8, 
+                                                                                    trim(substring(NVEFLT, 62, 7)) as ITEM, 
+                                                                                    trim(substring(NVEFLT, 69, 4)) as PKGU, 
+                                                                                    trim(substring(NVEFLT, 73, 26)) as DATE_TIME, 
+                                                                                    trim(substring(NVEFLT, 99, 10)) as PACKERID,
+                                                                                    trim(substring(NVEFLT, 101, 1)) as  EXPFLAG
+                                                            FROM HSIPCORDTA.NOFEOL
+                                                           WHERE date(trim(substring(NVEFLT, 73, 26))) >= '$yesterday'  ");
+$eolloosesql->execute();
+$eolloosearray = $eolloosesql->fetchAll(pdo::FETCH_ASSOC);
 
 
 $maxrange = 9999;
 $counter = 0;
-$rowcount = count($eolcasearray);
+$rowcount = count($eolloosearray);
 
 do {
     if ($maxrange > $rowcount) {  //prevent undefined offset
@@ -52,31 +53,32 @@ do {
     $data = array();
     $values = array();
     while ($counter <= $maxrange) { //split into 10,000 lines segments to insert into merge table //sub loop through items by whse to pull in CPC settings by whse/item
-        $WHS = intval($eolcasearray[$counter]['WHS']);
-        $BUILD = intval($eolcasearray[$counter]['BUILD']);
-        $BATCH = intval($eolcasearray[$counter]['BATCH']);
-        $FUNCT = ($eolcasearray[$counter]['FUNCT']);
-        $EQTYPE = ($eolcasearray[$counter]['EQTYPE']);
-        $LPNUM = intval($eolcasearray[$counter]['LPNUM']);
-        $BOXNUM = intval($eolcasearray[$counter]['BOXNUM']);
-        $TOTENUM = intval($eolcasearray[$counter]['TOTENUM']);
-        $TSM = intval($eolcasearray[$counter]['TSM']);
-        $OT = ($eolcasearray[$counter]['OT']);
-        $RA = ($eolcasearray[$counter]['RA']);
-        $ERR3 = ($eolcasearray[$counter]['ERR3']);
-        $ERR4 = ($eolcasearray[$counter]['ERR4']);
-        $ERR5 = ($eolcasearray[$counter]['ERR5']);
-        $ERR6 = ($eolcasearray[$counter]['ERR6']);
-        $ERR7 = ($eolcasearray[$counter]['ERR7']);
-        $ERR8 = ($eolcasearray[$counter]['ERR8']);
-        $ITEM = intval($eolcasearray[$counter]['ITEM']);
-        $DATE = date('Y-m-d', strtotime(substr($eolcasearray[$counter]['DATE_TIME'], 0, 10)));
-        $TIME = date('H:i:s', strtotime(substr($eolcasearray[$counter]['DATE_TIME'], 11, 8)));
+        $WHS = intval($eolloosearray[$counter]['WHS']);
+        $BUILD = intval($eolloosearray[$counter]['BUILD']);
+        $BATCH = intval($eolloosearray[$counter]['BATCH']);
+        $FUNCT = ($eolloosearray[$counter]['FUNCT']);
+        $LPNUM = intval($eolloosearray[$counter]['LPNUM']);
+        $TOTENUM = intval($eolloosearray[$counter]['TOTENUM']);
+        $BOXSIZE = ($eolloosearray[$counter]['BOXSIZE']);
+        $BOXLINES = intval($eolloosearray[$counter]['BOXLINES']);
+        $TSM = intval($eolloosearray[$counter]['TSM']);
+        $WI = ($eolloosearray[$counter]['WI']);
+        $CE = ($eolloosearray[$counter]['CE']);
+        $MI = ($eolloosearray[$counter]['MI']);
+        $AI = ($eolloosearray[$counter]['AI']);
+        $PE = ($eolloosearray[$counter]['PE']);
+        $ERR6 = ($eolloosearray[$counter]['ERR6']);
+        $ERR7 = ($eolloosearray[$counter]['ERR7']);
+        $ERR8 = ($eolloosearray[$counter]['ERR8']);
+        $ITEM = intval($eolloosearray[$counter]['ITEM']);
+        $PKGU = intval($eolloosearray[$counter]['PKGU']);
+        $DATE = date('Y-m-d', strtotime(substr($eolloosearray[$counter]['DATE_TIME'], 0, 10)));
+        $TIME = date('H:i:s', strtotime(substr($eolloosearray[$counter]['DATE_TIME'], 11, 8)));
         $DATE_TIME = date('Y-m-d H:i:s', strtotime($DATE . ' ' . $TIME));
-        $PACKID = intval($eolcasearray[$counter]['PACKID']);
-        $EXPFLAG = ($eolcasearray[$counter]['EXPFLAG']);
+        $PACKID = intval($eolloosearray[$counter]['PACKERID']);
+        $EXPFLAG = ($eolloosearray[$counter]['EXPFLAG']);
 
-        $data[] = "($WHS, $BUILD, $BATCH, '$FUNCT', '$EQTYPE', $LPNUM, $BOXNUM, $TOTENUM, $TSM, '$OT', '$RA',  '$ERR3', '$ERR4', '$ERR5', '$ERR6', '$ERR7', '$ERR8', $ITEM, '$DATE_TIME', $PACKID, '$EXPFLAG')";
+        $data[] = "($WHS, $BUILD, $BATCH, '$FUNCT', $LPNUM, $TOTENUM, '$BOXSIZE',  $BOXLINES, $TSM, '$WI', '$CE',  '$MI', '$AI', '$PE', '$ERR6', '$ERR7', '$ERR8', $ITEM, $PKGU, '$DATE_TIME', $PACKID, '$EXPFLAG')";
         $counter += 1;
     }
 
@@ -86,7 +88,7 @@ do {
     if (empty($values)) {
         break;
     }
-    $sql = "INSERT IGNORE INTO printvis.eol_case ($columns) VALUES $values";
+    $sql = "INSERT IGNORE INTO printvis.eol_loose ($columns) VALUES $values";
     $query = $conn1->prepare($sql);
     $query->execute();
     $maxrange += 10000;

@@ -10,7 +10,8 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../printvis/functions/functions_totetimes.php';
 
-$whsearray = array(6, 9, 2, 7, 3);
+//$whsearray = array(6, 9, 2, 7, 3);
+$whsearray = array(3, 6, 9, 2, 7, 3);
 
 
 
@@ -26,7 +27,8 @@ $yesterdaytime = ('16:59:59');
 $printcutoff = date('Y-m-d H:i:s', strtotime("$yesterday $yesterdaytime"));
 
 
-$deletdate = date('Y-m-d', strtotime("-180 days"));
+$deletdate = date('Y-m-d', strtotime("-10 days"));
+$deletdate_long = date('Y-m-d', strtotime("-180 days"));
 
 
 
@@ -34,7 +36,7 @@ $sqldelete = "DELETE FROM  printvis.packbatchdelete WHERE packbatchdelete_date <
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
-$sqldelete = "DELETE FROM  printvis.alltote_history WHERE totetimes_dateadded < '$deletdate'";
+$sqldelete = "DELETE FROM  printvis.alltote_history WHERE totetimes_dateadded < '$deletdate_long'";
 $querydelete = $conn1->prepare($sqldelete);
 $querydelete->execute();
 
@@ -102,11 +104,12 @@ foreach ($whsearray as $whsesel) {
     }
 
     $printhourmin = intval(date('Hi', strtotime('-20 minutes')));  //this is local to the DC because of timezone set.
+    $printhourmax = intval(date('Hi', strtotime('-5 minutes')));  //this is local to the DC because of timezone set.
     //$firstrun = intval($_POST['firstrun']);
     if ($firstrun == 1) {
         $printlimiter = ' ';
     } else {
-        $printlimiter = "and PBPTHM >= $printhourmin";
+        $printlimiter = "and PBPTHM >= $printhourmin and PBPTHM <= $printhourmax";
     }
 
 
@@ -216,9 +219,9 @@ foreach ($whsearray as $whsesel) {
         $packfunction = _packtype($PBICEF, $TRUEHAZ, $speedpack);
         $openpacktotes[] = "($PBLP9D, $PBWHSE, $PBCART, $PBBIN, '$PBBXSZ', '$PBSHPZ', $PBPTJD, $PBPTHR, '$PBICEF', '$PDHACL', '$PDHACL', $LINE_COUNT, $UNIT_COUNT, $EXP_CHECK, $LOT_CHECK, $LOT_UNITS, $SERIAL_CHECK, $TEMP_CHECK, $OD_CHECK, $SQ_CHECK, $TRUEHAZ, '$speedpack', '$packfunction')";
     }
-    $arraycount = count($openpacktotes);
+    //$arraycount = count($openpacktotes);
 
-    if ($arraycount > 0) {
+    if (!empty($openpacktotes)) {
         //Add to table pack_opentotes
         $values5 = implode(',', $openpacktotes);
         $sql5 = "INSERT IGNORE INTO printvis.pack_opentotes ($columns_opentotes) VALUES $values5";
@@ -408,10 +411,10 @@ foreach ($whsearray as $whsesel) {
 //took out $loosepm_box13, not on NY server yet
             $standard_totaltime = $standard_shorts + $loosepm_scanlp + $totalboxtime + $standard_contentlist + $standard_unit + $standard_line + $standard_expiry + $standard_lot + $standard_lot_unit + $standard_sn + $loosepm_box24 + $loosepm_temp + $standard_od + $standard_sq + $loosepm_shcode + $loosepm_truehaz + $loosepm_tempindicator;
             $standard_timewithPFD = $standard_totaltime * (1 + $loosepm_personal + $loosepm_fatigue + $loosepm_delay); //is this right?  at tote or batch level?  does it matter?
-            if($standard_timewithPFD > 999){
+            if ($standard_timewithPFD > 999) {
                 $standard_timewithPFD = 999;
             }
-            
+
             $data[] = "($PBLP9D, '$PACKFUNCTION', $PDWHSE, $PDCART, $PDBIN, '$PDBXSZ', '$PDSHPZ', $LINE_COUNT, $UNIT_COUNT, $EXP_CHECK, $LOT_CHECK, $SERIAL_CHECK, $SHORTCHECK, $TEMP_CHECK, $OD_CHECK, $SQ_CHECK, '$standard_shorts', '$loosepm_scanlp', '$totalboxtime', '$standard_contentlist', '$standard_unit', '$standard_line', '$standard_expiry', '$standard_lot', '$standard_lot_unit', '$standard_sn', '$loosepm_box24', '$loosepm_temp','$standard_od','$standard_sq', '$loosepm_truehaz', '$standard_totaltime', '$standard_timewithPFD', '$printdatetime')";
             $counter += 1;
         }
@@ -483,7 +486,7 @@ foreach ($whsearray as $whsesel) {
             //Is this a speedpack batch?
 //            $speedpack_key = array_search($batch_start_batch, array_column($toteenddata_array, 'BATCH')); //Find 'L04' associated key
 //            if ($speedpack_key !== FALSE) {
-            $speedpack = $toteenddata_array[$speedpack_key]['SPEEDPACK'];
+            $speedpack = $toteenddata_array[$counter]['SPEEDPACK'];
 //            } else {
 //                $speedpack = 'N';
 //            }

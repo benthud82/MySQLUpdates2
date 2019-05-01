@@ -99,7 +99,7 @@ LEFT JOIN
                                                        ,PCCHEI	 AS PL_HEIGHT
                                                        ,PCCWID AS PL_WIDTH
                                                        ,PCNSTV AS NEST_INC
-                                                       ,PCECNV as CASE_CONVEY
+                                                       ,PCCCNV as CASE_CONVEY
 
                                                         FROM HSIPCORDTA.NPFCPC
                                                           
